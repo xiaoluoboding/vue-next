@@ -41,6 +41,8 @@ interface Store {
   readonly activeFile: File
   readonly importMap: string | undefined
   errors: (string | Error)[]
+  runtimeErrors: (string | Error)[]
+  runtimeWarning: (string | Error)[]
 }
 
 let files: Store['files'] = {}
@@ -67,7 +69,9 @@ export const store: Store = reactive({
     const file = store.files['import-map.json']
     return file && file.code
   },
-  errors: []
+  errors: [],
+  runtimeErrors: [],
+  runtimeWarning: []
 })
 
 watchEffect(() => compileFile(store.activeFile))

@@ -23,18 +23,16 @@
         </div>
       </template>
     </SplitPane>
-    <Message :err="store.errors[0]" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import FileSelector from './FileSelector.vue'
-import Message from '@/components/Message.vue'
 import MonacoEditor from '@/components/monaco/index.vue'
 import SplitPane from '@/components/SplitPane.vue'
-import { store } from '../store'
-import { debounce } from '../utils'
-import { ref, watch } from 'vue'
+import { store } from '@/store'
+import { debounce } from '@/utils'
 
 const onChange = debounce((code: string) => {
   store.activeFile.code = code
@@ -77,7 +75,7 @@ ${activeSFC.value.isSetup ? '<script setup>' : '<script>'}
 }
 
 .block {
-  @apply text-gray-900 dark:text-white bg-white dark:bg-true-gray-900
+  @apply text-gray-900 dark:text-white bg-white dark:bg-dark-500
 }
 
 .block .block-title {

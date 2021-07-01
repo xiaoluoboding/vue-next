@@ -1,23 +1,39 @@
 <template>
-  <div class="tab-buttons">
-    <button v-for="m of modes" :class="{ active: mode === m }" @click="mode = m">
-      {{ m }}
-    </button>
-  </div>
+  <SplitPane horizontal>
+    <template #left>
+      <div class="tab-buttons">
+        <button v-for="m of modes" :class="{ active: mode === m }" @click="mode = m">
+          {{ m }}
+        </button>
+      </div>
 
-  <div class="output-container">
-    <Preview v-if="mode === 'preview'" />
-    <CodeMirror
-      v-else
-      readonly
-      :mode="mode === 'css' ? 'css' : 'javascript'"
-      :value="store.activeFile.compiled[mode]"
-    />
-  </div>
+      <div class="output-container">
+        <Preview v-if="mode === 'preview'" />
+        <CodeMirror
+          v-else
+          readonly
+          :mode="mode === 'css' ? 'css' : 'javascript'"
+          :value="store.activeFile.compiled[mode]"
+        />
+      </div>
+    </template>
+    <template #right>
+      <div class="text-gray-900 dark:text-white bg-white dark:bg-dark-500">
+        <div class="select-none text-xs font-semibold px-4 py-2">
+          Console
+        </div>
+        <div class="w-full h-full absolute top-0 left-0 right-0 bottom-0 pt-8">
+          <Console />
+        </div>
+      </div>
+    </template>
+  </SplitPane>
 </template>
 
 <script setup lang="ts">
+import SplitPane from '@/components/SplitPane.vue'
 import Preview from './Preview.vue'
+import Console from './Console.vue'
 import CodeMirror from '../codemirror/CodeMirror.vue'
 import { store } from '../store'
 import { ref } from 'vue'

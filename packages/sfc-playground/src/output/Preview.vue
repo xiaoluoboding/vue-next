@@ -1,12 +1,8 @@
 <template>
-  <div class="preview-container" ref="container">
-</div>
-  <Message :err="runtimeError" />
-  <Message v-if="!runtimeError" :warn="runtimeWarning" />
+  <div class="preview-container" ref="container"></div>
 </template>
 
 <script setup lang="ts">
-import Message from '@/components/Message.vue'
 import { ref, onMounted, onUnmounted, watchEffect, watch, inject } from 'vue'
 import type { WatchStopHandle, Ref } from 'vue'
 import srcdoc from './srcdoc.html?raw'
@@ -18,10 +14,8 @@ import { store } from '@/store'
 
 import { IS_DARKMODE } from '@/types'
 
-const s = new MagicString('')
+const s = new MagicString(srcdoc)
 const container = ref()
-const runtimeError = ref()
-const runtimeWarning = ref()
 const isDarkmode = inject(IS_DARKMODE) as Ref<boolean>
 
 let sandbox: HTMLIFrameElement
@@ -100,13 +94,8 @@ function createSandbox() {
     importMap.imports = {}
   }
   importMap.imports.vue = vueRuntimeUrl.value
-  s.append(srcdoc)
-  // const sandboxSrc = srcdoc.replace(/<!--IMPORT_MAP-->/, JSON.stringify(importMap))
-  // sandbox.srcdoc = sandboxSrc
   const sandboxSrc = s.toString().replace(/<!--IMPORT_MAP-->/, JSON.stringify(importMap))
   sandbox.srcdoc = sandboxSrc
-  
-  // sandbox.srcdoc = srcdoc
   container.value.appendChild(sandbox)
 
   proxy = new PreviewProxy(sandbox, {
@@ -119,10 +108,10 @@ function createSandbox() {
         msg.includes('Failed to resolve module specifier') ||
         msg.includes('Error resolving module specifier')
       ) {
-        runtimeError.value = msg.replace(/\. Relative references must.*$/, '') +
-        `.\nTip: add an "import-map.json" file to specify import paths for dependencies.`
+        store.runtimeErrors = [msg.replace(/\. Relative references must.*$/, '') +
+        `.\nTip: add an "import-map.json" file to specify import paths for dependencies.`]
       } else {
-        runtimeError.value = event.value
+        store.runtimeErrors = [event.value]
       }
     },
     on_unhandled_rejection: (event: any) => {
@@ -130,7 +119,7 @@ function createSandbox() {
       if (typeof error === 'string') {
         error = { message: error }
       }
-      runtimeError.value = 'Uncaught (in promise): ' + error.message
+      store.runtimeErrors = ['Uncaught (in promise): ' + error.message]
     },
     on_console: (log: any) => {
       if (log.duplicate) {
@@ -138,16 +127,17 @@ function createSandbox() {
       }
       if (log.level === 'error') {
         if (log.args[0] instanceof Error) {
-          runtimeError.value = log.args[0].message
+          store.runtimeErrors = [log.args[0].message]
         } else {
-          runtimeError.value = log.args[0]
+          store.runtimeErrors = [log.args[0]]
         }
       } else if (log.level === 'warn') {
         if (log.args[0].toString().includes('[Vue warn]')) {
-          runtimeWarning.value = log.args
+          store.runtimeWarning = [log.args
             .join('')
             .replace(/\[Vue warn\]:/, '')
             .trim()
+          ]
         }
       }
     },
@@ -173,16 +163,12 @@ async function updatePreview() {
   if (import.meta.env.PROD) {
     console.clear()
   }
-  runtimeError.value = null
-  runtimeWarning.value = null
+  store.runtimeErrors = []
+  store.runtimeWarning = []
 
   const applyStyles = isDarkmode.value
-      ? `
-        document.querySelector("html").classList.add("dark");
-      `
-      : `
-        document.querySelector("html").classList.remove("dark");
-      `
+      ? `document.querySelector("html").classList.add("dark");`
+      : `document.querySelector("html").classList.remove("dark");`
       
   try {
     const modules = compileModulesForPreview()
@@ -207,7 +193,7 @@ app.mount('#app')`.trim(),
       applyStyles
     ])
   } catch (e) {
-    runtimeError.value = e.message
+    store.runtimeErrors = [e.message]
   }
 }
 </script>
