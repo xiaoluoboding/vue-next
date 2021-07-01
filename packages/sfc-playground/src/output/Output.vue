@@ -1,6 +1,8 @@
 <template>
   <div class="tab-buttons">
-    <button v-for="m of modes" :class="{ active: mode === m }" @click="mode = m">{{ m }}</button>
+    <button v-for="m of modes" :class="{ active: mode === m }" @click="mode = m">
+      {{ m }}
+    </button>
   </div>
 
   <div class="output-container">
@@ -20,7 +22,7 @@ import CodeMirror from '../codemirror/CodeMirror.vue'
 import { store } from '../store'
 import { ref } from 'vue'
 
-const modes = ['preview', 'js', 'css', 'ssr'] as const
+const modes = ['preview', 'js', 'css', 'windicss', 'ssr'] as const
 
 type Modes = typeof modes[number]
 const mode = ref<Modes>('preview')
@@ -34,8 +36,7 @@ const mode = ref<Modes>('preview')
 }
 .tab-buttons {
   box-sizing: border-box;
-  border-bottom: 1px solid #ddd;
-  background-color: white;
+  border-bottom: 1px solid var(--border-color);
 }
 .tab-buttons button {
   font-size: 13px;

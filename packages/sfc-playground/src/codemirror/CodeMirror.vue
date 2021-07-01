@@ -3,11 +3,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, defineProps, defineEmits, watchEffect } from 'vue'
+import { ref, onMounted, defineProps, defineEmits, watchEffect, inject, watch, computed } from 'vue'
+import type { Ref } from 'vue'
 import { debounce } from '../utils'
 import CodeMirror from './codemirror'
+import { IS_DARKMODE } from '@/types'
 
 const el = ref()
+const isDarkmode = inject(IS_DARKMODE) as Ref<boolean>
+const activeTheme = computed(() => isDarkmode.value ? 'material-darker' : 'default')
 
 const props = defineProps({
   mode: {
@@ -41,6 +45,7 @@ onMounted(() => {
     tabSize: 2,
     lineWrapping: true,
     lineNumbers: true,
+    theme: activeTheme.value,
     ...addonOptions
   })
 
@@ -54,6 +59,12 @@ onMounted(() => {
   watchEffect(() => {
     editor.setOption('mode', props.mode)
   })
+  watch(
+    () => isDarkmode.value,
+    () => {
+      editor.setOption('theme', activeTheme.value)
+    }
+  )
 
   window.addEventListener(
     'resize',
@@ -74,6 +85,11 @@ onMounted(() => {
   height: 100%;
   width: 100%;
   overflow: hidden;
+  background-color: #fff;
+}
+
+.dark .editor {
+  background-color: #171717;
 }
 
 .CodeMirror {

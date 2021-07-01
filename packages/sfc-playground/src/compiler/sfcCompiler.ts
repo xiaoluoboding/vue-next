@@ -1,6 +1,7 @@
-import { store, File } from './store'
+import { store, File } from '../store'
 import { SFCDescriptor, BindingMetadata } from '@vue/compiler-sfc'
 import * as defaultCompiler from '@vue/compiler-sfc'
+import { generateStyles } from './windiCompiler'
 import { ref } from 'vue'
 
 export const MAIN_FILE = 'App.vue'
@@ -36,7 +37,7 @@ export function resetVersion() {
   vueRuntimeUrl.value = defaultVueUrl
 }
 
-export async function compileFile({ filename, code, compiled }: File) {
+export async function compileFile({ filename, code, sfc, compiled }: File) {
   if (!code.trim()) {
     store.errors = []
     return
@@ -76,6 +77,21 @@ export async function compileFile({ filename, code, compiled }: File) {
     store.errors = [`Only lang="ts" is supported for <script> blocks.`]
     return
   }
+
+  const dTemplateContent =
+    (descriptor.template && descriptor.template.content) || ''
+  const dScriptContent = (descriptor.script && descriptor.script.content) || ''
+  const dScriptSetupContent =
+    (descriptor.scriptSetup && descriptor.scriptSetup.content) || ''
+
+  // console.log(descriptor.template)
+  // console.log(descriptor.script)
+  // console.log(descriptor.scriptSetup)
+
+  sfc.isSetup =
+    (descriptor.scriptSetup && descriptor.scriptSetup.setup) || false
+  sfc.template = dTemplateContent.trim()
+  sfc.script = sfc.isSetup ? dScriptSetupContent.trim() : dScriptContent.trim()
 
   const hasScoped = descriptor.styles.some(s => s.scoped)
   let clientCode = ''
@@ -177,6 +193,15 @@ export async function compileFile({ filename, code, compiled }: File) {
     compiled.css = '/* No <style> tags present */'
   }
 
+  // windi css
+  const windiCSS = generateStyles(sfc.template)
+
+  if (windiCSS) {
+    compiled.windicss = windiCSS
+  } else {
+    compiled.windicss = '/* No windicss utility classes in template */'
+  }
+
   // clear errors
   store.errors = []
 }
@@ -208,6 +233,9 @@ async function doCompileScript(
       code +=
         `\n` +
         SFCCompiler.rewriteDefault(compiledScript.content, COMP_IDENTIFIER)
+
+      // console.log(compiledScript)
+      // console.log(compiledScript.content.trim())
 
       if ((descriptor.script || descriptor.scriptSetup)!.lang === 'ts') {
         code = (await import('sucrase')).transform(code, {

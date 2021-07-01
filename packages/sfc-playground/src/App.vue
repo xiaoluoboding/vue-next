@@ -13,10 +13,16 @@
 </template>
 
 <script setup lang="ts">
+import { provide } from 'vue'
 import Header from './Header.vue'
-import SplitPane from './SplitPane.vue'
+import SplitPane from './components/SplitPane.vue'
 import Editor from './editor/Editor.vue'
 import Output from './output/Output.vue'
+
+import { useDark } from '@/composable/useDark'
+import { IS_DARKMODE } from './types'
+
+provide(IS_DARKMODE, useDark())
 </script>
 
 <style>
@@ -26,12 +32,14 @@ body {
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   color: var(--base);
   margin: 0;
-  background-color: #f8f8f8;
+  /* background-color: #F1F5F9; */
   --base: #444;
   --nav-height: 50px;
   --font-code: 'Source Code Pro', monospace;
   --color-branding: #3ca877;
   --color-branding-dark: #416f9c;
+  --border-color: rgba(200, 200, 200, .12);
+  @apply bg-gray-100 dark:bg-gray-900;
 }
 
 .wrapper {
@@ -44,5 +52,10 @@ button {
   cursor: pointer;
   margin: 0;
   background-color: transparent;
+  outline: none;
+}
+
+button:focus {
+  outline: none !important;
 }
 </style>

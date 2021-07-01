@@ -1,5 +1,5 @@
 import { reactive, watchEffect } from 'vue'
-import { compileFile, MAIN_FILE } from './sfcCompiler'
+import { compileFile, MAIN_FILE } from './compiler/sfcCompiler'
 import { utoa, atou } from './utils'
 
 const welcomeCode = `
@@ -15,13 +15,21 @@ const msg = 'Hello World!'
 export class File {
   filename: string
   code: string
+  sfc = {
+    isSetup: false,
+    template: '',
+    script: '',
+    style: ''
+  }
+
   compiled = {
     js: '',
     css: '',
-    ssr: ''
+    ssr: '',
+    windicss: ''
   }
 
-  constructor(filename: string, code = '') {
+  constructor(filename: string, code: string = '') {
     this.filename = filename
     this.code = code
   }

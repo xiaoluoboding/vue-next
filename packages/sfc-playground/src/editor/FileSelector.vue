@@ -69,8 +69,7 @@ function doneAddFile() {
 <style scoped>
 .file-selector {
   box-sizing: border-box;
-  border-bottom: 1px solid #ddd;
-  background-color: white;
+  border-bottom: 1px solid var(--border-color);
 }
 .file {
   display: inline-block;

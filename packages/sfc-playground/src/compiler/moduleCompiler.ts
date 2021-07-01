@@ -1,5 +1,5 @@
 import { store, File } from '../store'
-import { MAIN_FILE } from '../sfcCompiler'
+import { MAIN_FILE } from './sfcCompiler'
 import {
   babelParse,
   MagicString,
@@ -25,7 +25,7 @@ function processFile(file: File, seen = new Set<File>()) {
   }
   seen.add(file)
 
-  const { js, css } = file.compiled
+  const { js, css, windicss } = file.compiled
 
   const s = new MagicString(js)
 
@@ -209,6 +209,11 @@ function processFile(file: File, seen = new Set<File>()) {
   // append CSS injection code
   if (css) {
     s.append(`\nwindow.__css__ += ${JSON.stringify(css)}`)
+  }
+
+  // append WindiCSS injection code
+  if (windicss) {
+    s.append(`\nwindow.__windicss__ += ${JSON.stringify(windicss)}`)
   }
 
   const processed = [s.toString()]

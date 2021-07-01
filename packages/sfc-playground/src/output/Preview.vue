@@ -6,18 +6,23 @@
 </template>
 
 <script setup lang="ts">
-import Message from '../Message.vue'
-import { ref, onMounted, onUnmounted, watchEffect, watch } from 'vue'
-import type { WatchStopHandle } from 'vue'
+import Message from '@/components/Message.vue'
+import { ref, onMounted, onUnmounted, watchEffect, watch, inject } from 'vue'
+import type { WatchStopHandle, Ref } from 'vue'
 import srcdoc from './srcdoc.html?raw'
 import { PreviewProxy } from './PreviewProxy'
-import { MAIN_FILE, vueRuntimeUrl } from '../sfcCompiler'
-import { compileModulesForPreview } from './moduleCompiler'
-import { store } from '../store'
+import { MagicString } from '@vue/compiler-sfc' 
+import { MAIN_FILE, vueRuntimeUrl } from '@/compiler/sfcCompiler'
+import { compileModulesForPreview } from '@/compiler/moduleCompiler'
+import { store } from '@/store'
 
+import { IS_DARKMODE } from '@/types'
+
+const s = new MagicString('')
 const container = ref()
 const runtimeError = ref()
 const runtimeWarning = ref()
+const isDarkmode = inject(IS_DARKMODE) as Ref<boolean>
 
 let sandbox: HTMLIFrameElement
 let proxy: PreviewProxy
@@ -95,8 +100,13 @@ function createSandbox() {
     importMap.imports = {}
   }
   importMap.imports.vue = vueRuntimeUrl.value
-  const sandboxSrc = srcdoc.replace(/<!--IMPORT_MAP-->/, JSON.stringify(importMap))
+  s.append(srcdoc)
+  // const sandboxSrc = srcdoc.replace(/<!--IMPORT_MAP-->/, JSON.stringify(importMap))
+  // sandbox.srcdoc = sandboxSrc
+  const sandboxSrc = s.toString().replace(/<!--IMPORT_MAP-->/, JSON.stringify(importMap))
   sandbox.srcdoc = sandboxSrc
+  
+  // sandbox.srcdoc = srcdoc
   container.value.appendChild(sandbox)
 
   proxy = new PreviewProxy(sandbox, {
@@ -165,12 +175,21 @@ async function updatePreview() {
   }
   runtimeError.value = null
   runtimeWarning.value = null
+
+  const applyStyles = isDarkmode.value
+      ? `
+        document.querySelector("html").classList.add("dark");
+      `
+      : `
+        document.querySelector("html").classList.remove("dark");
+      `
+      
   try {
     const modules = compileModulesForPreview()
     console.log(`successfully compiled ${modules.length} modules.`)
     // reset modules
     await proxy.eval([
-      `window.__modules__ = {};window.__css__ = ''`,
+      `window.__modules__ = {};window.__css__ = '';window.__windicss__ = ''`,
       ...modules,
       `
 import { createApp as _createApp } from "vue"
@@ -181,9 +200,11 @@ if (window.__app__) {
 }
 
 document.getElementById('__sfc-styles').innerHTML = window.__css__
+document.getElementById('__sfc-windicss').innerHTML = window.__windicss__
 const app = window.__app__ = _createApp(__modules__["${MAIN_FILE}"].default)
 app.config.errorHandler = e => console.error(e)
-app.mount('#app')`.trim()
+app.mount('#app')`.trim(),
+      applyStyles
     ])
   } catch (e) {
     runtimeError.value = e.message
@@ -197,6 +218,5 @@ iframe {
   width: 100%;
   height: 100%;
   border: none;
-  background-color: #fff;
 }
 </style>

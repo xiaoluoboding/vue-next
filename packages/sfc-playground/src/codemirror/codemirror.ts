@@ -16,4 +16,7 @@ import 'codemirror/addon/fold/brace-fold.js'
 import 'codemirror/addon/fold/indent-fold.js'
 import 'codemirror/addon/fold/comment-fold.js'
 
+// themes
+import 'codemirror/theme/material-darker.css'
+
 export default CodeMirror
