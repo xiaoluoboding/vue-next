@@ -40,6 +40,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           htmlWorker: [`${prefix}/languages/html/html.worker`],
+          cssWorker: [`${prefix}/languages/css/css.worker`],
           tsWorker: [`${prefix}/language/typescript/ts.worker`],
           editorWorker: [`${prefix}/editor/editor.worker`]
         }

@@ -11,7 +11,7 @@ export function generateStyles(html: string): string {
   const parser = new HTMLParser(html)
 
   // Generate preflight based on the html we input
-  const preflightSheet = processor.preflight(html)
+  // const preflightSheet = processor.preflight(html)
 
   // Parse all classes and put into one line to simplify operations
   const htmlClasses = parser
@@ -63,7 +63,7 @@ export function generateStyles(html: string): string {
   const MINIFY = false
   const styles = attrsSheet.styleSheet
     .extend(interpretedSheet)
-    .extend(preflightSheet, APPEND)
+    // .extend(preflightSheet, APPEND)
     .build(MINIFY)
 
   // console.log('Styles', styles)

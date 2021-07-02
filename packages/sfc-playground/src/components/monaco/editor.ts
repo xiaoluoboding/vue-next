@@ -2,8 +2,6 @@ import * as monaco from 'monaco-editor'
 /* __imports__ */
 import vueTypes from '../../../../runtime-core/dist/runtime-core.d.ts?raw'
 
-// console.log(vueTypes)
-
 const setup = async () => {
   monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
     ...monaco.languages.typescript.typescriptDefaults.getCompilerOptions(),
@@ -35,10 +33,12 @@ const setup = async () => {
       const [
         { default: EditorWorker },
         { default: HtmlWorker },
+        { default: CSSWorker },
         { default: TsWorker }
       ] = await Promise.all([
         import('monaco-editor/esm/vs/editor/editor.worker.js?worker'),
         import('monaco-editor/esm/vs/language/html/html.worker.js?worker'),
+        import('monaco-editor/esm/vs/language/css/css.worker.js?worker'),
         import('monaco-editor/esm/vs/language/typescript/ts.worker.js?worker')
       ])
 
@@ -46,6 +46,7 @@ const setup = async () => {
       window.MonacoEnvironment = {
         getWorker(_: any, label: string) {
           if (label === 'html') return new HtmlWorker()
+          if (label === 'css') return new CSSWorker()
           if (label === 'typescript' || label === 'javascript')
             return new TsWorker()
           return new EditorWorker()

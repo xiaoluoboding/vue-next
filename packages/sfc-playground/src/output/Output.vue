@@ -1,24 +1,31 @@
 <template>
   <SplitPane horizontal allow-push :size="outputPaneSize">
     <template #left>
-      <div class="tab-buttons">
-        <button v-for="m of modes" :class="{ active: mode === m }" @click="mode = m">
-          {{ m }}
-        </button>
-      </div>
+      <div class="preview-pane flex flex-col h-full">
+        <div class="tab-buttons h-9 box-border">
+          <button
+            v-for="m of modes"
+            :key="m"
+            :class="{ active: mode === m }"
+            @click="mode = m"
+          >
+            {{ m }}
+          </button>
+        </div>
 
-      <div class="output-container">
-        <Preview v-if="mode === 'preview'" />
-        <CodeMirror
-          v-else
-          readonly
-          :mode="mode === 'css' ? 'css' : 'javascript'"
-          :value="store.activeFile.compiled[mode]"
-        />
+        <div class="output-container relative overflow-hidden flex-1 box-border">
+          <Preview v-if="mode === 'preview'" />
+          <MonacoEditor
+            v-else
+            v-model="store.activeFile.compiled[mode]"
+            readonly
+            :language="mode === 'css' ? 'css' : 'javascript'"
+          />
+        </div>
       </div>
     </template>
     <template #right>
-      <div class="pane">
+      <div class="pane console-pane">
         <div class="pane-title justify-between">
           <div>
             <span>Console</span>
@@ -41,11 +48,10 @@
 </template>
 
 <script setup lang="ts">
-import SplitPane from '@/components/SplitPane.vue'
 import Preview from './Preview.vue'
 import Console from './Console.vue'
-import CodeMirror from '../codemirror/CodeMirror.vue'
-import { store, clearErrors } from '../store'
+import MonacoEditor from '@/components/monaco/index.vue'
+import { store, clearErrors } from '@/store'
 import { ref } from 'vue'
 
 const modes = ['preview', 'js', 'css', 'windicss', 'ssr'] as const
@@ -59,26 +65,18 @@ const handleCollapseConsole = () => outputPaneSize.value = [100, 0]
 </script>
 
 <style scoped>
-.output-container {
-  height: calc(100% - 35px);
-  overflow: hidden;
-  position: relative;
-}
 .tab-buttons {
-  box-sizing: border-box;
   border-bottom: 1px solid var(--border-color);
 }
 .tab-buttons button {
   font-size: 13px;
   font-family: var(--font-code);
   padding: 8px 16px 6px;
-  text-transform: uppercase;
-  color: #999;
-  box-sizing: border-box;
+  @apply box-border uppercase text-true-gray-500 dark:text-cool-gray-300;
 }
 
 button.active {
-  color: var(--color-branding-dark);
+  color: var(--color-branding-dark) !important;
   border-bottom: 3px solid var(--color-branding-dark);
 }
 

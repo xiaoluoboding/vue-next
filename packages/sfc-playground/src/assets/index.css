@@ -9,6 +9,7 @@
   @apply h-8 select-none text-xs font-semibold box-border;
   @apply px-4;
   @apply z-10;
+  @apply text-true-gray-500 dark:text-true-gray-300;
   border-bottom: 1px solid var(--border-color);
 }
 

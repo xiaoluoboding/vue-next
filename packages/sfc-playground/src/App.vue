@@ -15,7 +15,6 @@
 <script setup lang="ts">
 import { provide } from 'vue'
 import Header from './header/index.vue'
-import SplitPane from './components/SplitPane.vue'
 import Editor from './editor/Editor.vue'
 import Output from './output/Output.vue'
 
