@@ -1,4 +1,5 @@
 import { reactive, watchEffect } from 'vue'
+import { MagicString } from '@vue/compiler-sfc'
 import { compileFile, MAIN_FILE } from './compiler/sfcCompiler'
 import { utoa, atou } from './utils'
 
@@ -10,6 +11,21 @@ const welcomeCode = `
 <script setup>
 const msg = 'Hello World!'
 </script>
+`.trim()
+
+export const MAIN_CODE = `
+import { createApp as _createApp } from "vue"
+
+if (window.__app__) {
+  window.__app__.unmount()
+  document.getElementById('app').innerHTML = ''
+}
+
+document.getElementById('__sfc-styles').innerHTML = window.__css__
+document.getElementById('__sfc-windicss').innerHTML = window.__windicss__
+const app = window.__app__ = _createApp(__modules__["${MAIN_FILE}"].default)
+app.config.errorHandler = e => console.error(e)
+app.mount('#app')
 `.trim()
 
 export class File {
@@ -55,7 +71,7 @@ if (savedFiles) {
   }
 } else {
   files = {
-    'App.vue': new File(MAIN_FILE, welcomeCode)
+    [MAIN_FILE]: new File(MAIN_FILE, welcomeCode)
   }
 }
 
@@ -68,6 +84,28 @@ export const store: Store = reactive({
   get importMap() {
     const file = store.files['import-map.json']
     return file && file.code
+  },
+  get activeSFCCode() {
+    const s = new MagicString('')
+    const activeFile = store.files[store.activeFilename]
+
+    const sfcCode = `<template>
+  ${activeFile.sfc.template}
+<\/template>
+
+${activeFile.sfc.isSetup ? '<script setup>' : '<script>'}
+  ${activeFile.sfc.script}
+<\/script>
+`
+    s.append(sfcCode)
+    if (activeFile.sfc.style) {
+      const sfcStyle = `<style>
+${activeFile.sfc.style}
+<\/style>`
+      s.append(sfcStyle)
+    }
+
+    return s.toString()
   },
   errors: [],
   runtimeErrors: [],
@@ -120,4 +158,10 @@ export function deleteFile(filename: string) {
     }
     delete store.files[filename]
   }
+}
+
+export function clearErrors() {
+  store.errors = []
+  store.runtimeErrors = []
+  store.runtimeWarning = []
 }

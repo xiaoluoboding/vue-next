@@ -12,9 +12,11 @@
       <slot name="left" />
     </div>
     <div
+      title="Double-click to reset size"
       class="split-pane__dragger before:bg-blue-gray-300 after:bg-blue-gray-300 dark:before:bg-true-gray-700 dark:after:bg-true-gray-700"
       :style="draggerStyle"
       @mousedown.prevent="dragStart"
+      @dblclick="handleDbClick"
     />
     <div class="split-pane__right" :style="rightStyle">
       <slot name="right" />
@@ -23,20 +25,22 @@
 </template>
 
 <script lang="ts">
-import { ref, reactive, defineComponent, toRefs, computed, onMounted, onUnmounted } from 'vue'
-import { debounce } from '../utils'
+import { ref, reactive, defineComponent, toRefs, computed, onMounted, PropType, watch } from 'vue'
 
 export default defineComponent({
   name: 'SplitPane',
 
   props: {
-    horizontal: { type: Boolean, default: false }
+    horizontal: { type: Boolean, default: false },
+    size: { type: Array as PropType<number[]>, default: [50, 50] },
+    allowPush: { type: Boolean, default: false },
   },
 
   setup (props, { emit }) {
     const container = ref()
 
     const state = reactive({
+      initialSpilt: 50,
       dragging: false,
       split: 50,
       isHorizontal: computed(() => props.horizontal)
@@ -46,7 +50,7 @@ export default defineComponent({
       const { split } = state
       return split < 20
         ? 20
-        : split > 80
+        : (split > 80 && !props.allowPush)
           ? 80
           : split
     }
@@ -86,10 +90,14 @@ export default defineComponent({
       ])
     }
 
-    // const onResize = () => {
-    //   const containerSize = container.value.offsetWidth
-    //   state.isHorizontal = containerSize > 720
-    // }
+    function handleDbClick () {
+      state.split = state.initialSpilt
+    }
+
+    function setSize () {
+      const [leftSize, ] = props.size
+      state.split = leftSize
+    }
 
     const splitPaneStyle = computed(() => {
       return {
@@ -111,32 +119,27 @@ export default defineComponent({
 
     const draggerStyle = computed(() => {
       return state.isHorizontal
-        ? {
-            left: 0, right: 0, bottom: 0, cursor: 'row-resize',
-            borderTop: '1px solid var(--border-color)',
-            borderBottom: '1px solid var(--border-color)'
-          }
-        : {
-            top: 0, bottom: 0, right: 0, cursor: 'col-resize',
-            borderLeft: '1px solid var(--border-color)',
-            borderRight: '1px solid var(--border-color)'
-          }
+        ? { left: 0, right: 0, bottom: 0, cursor: 'row-resize' }
+        : { top: 0, bottom: 0, right: 0, cursor: 'col-resize' }
     })
 
-    // onMounted(() => {
-    //   window.addEventListener('resize', onResize, false)
-    //   onResize()
-    // })
-
-    // onUnmounted(() => {
-    //   window.removeEventListener('resize', onResize, false)
-    // })
+    onMounted(() => {
+      const [leftSize, ] = props.size
+      state.initialSpilt = leftSize
+      setSize()
+    })
+    
+    watch(
+      () => props.size,
+      () => { setSize() }
+    )
 
     return {
       container,
       dragStart,
       dragMove,
       dragEnd,
+      handleDbClick,
       boundSplit,
       splitPaneStyle,
       leftStyle,
@@ -150,9 +153,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .split-pane {
-  display: flex;
-  height: 100%;
-  background-color: inherit;
+  @apply flex h-full;
 }
 .split-pane.dragging {
   cursor: col-resize;
@@ -166,20 +167,16 @@ export default defineComponent({
 }
 .split-pane__left,
 .split-pane__right {
-  position: relative;
-  height: 100%;
+  @apply relative h-full;
+  transition:
+    .1s height ease-in-out,
+    .1s width ease-in-out;
 }
 .split-pane__dragger {
-  box-sizing: border-box;
-  position: relative;
-  z-index: 1;
-  padding: 0;
-  background-color: transparent;
-  border-color: transparent;
-  border: none;
-  min-height: 1rem;
-  min-width: 1rem;
-  transition: all .1s ease;
+  @apply box-border relative z-1 p-0 bg-transparent border-transparent border-none;
+  @apply min-h-4 min-w-4 transition-all;
+  border-left: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
 
   &::before,
   &::after {
@@ -208,6 +205,9 @@ export default defineComponent({
 
 .split-pane.is-horizontal {
   .split-pane__dragger {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     &::before,
     &::after {
       width: 2.5em;

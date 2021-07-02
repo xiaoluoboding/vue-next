@@ -1,12 +1,12 @@
 <template>
-  <div class="flex items-center px-2 py-2 space-x-2 border-b dark:border-dark-400 font-mono">
+  <div class="flex items-center px-2 py-2 space-x-2 border-b dark:border-dark-200 font-mono">
     <div class="text-xs px-1 py-[3px] flex justify-center items-center bg-yellow-500 text-yellow-900 font-bold rounded whitespace-nowrap" v-if="type === 'Runtime Warning'">
       {{ type }}
     </div>
     <div class="text-xs px-1 py-[3px] flex justify-center items-center bg-red-500 text-red-900 font-bold rounded whitespace-nowrap" v-else>
       {{ type }}
     </div>
-    <span class="text-sm dark:(text-light-900 text-opacity-50)">
+    <span class="text-xs dark:(text-light-900 text-opacity-50)">
       {{ formatMessage(message) }}
     </span>
   </div>
