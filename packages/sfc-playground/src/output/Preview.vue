@@ -8,13 +8,14 @@ import type { WatchStopHandle, Ref } from 'vue'
 import srcdoc from './srcdoc.html?raw'
 import { PreviewProxy } from './PreviewProxy'
 import { MagicString } from '@vue/compiler-sfc' 
-import { MAIN_FILE, vueRuntimeUrl } from '@/compiler/sfcCompiler'
+import { vueRuntimeUrl } from '@/compiler/sfcCompiler'
 import { compileModulesForPreview } from '@/compiler/moduleCompiler'
-import { store } from '@/store'
+import { store, MAIN_CODE } from '@/store'
 
 import { IS_DARKMODE } from '@/types'
 
 const s = new MagicString(srcdoc)
+const IMPORT_MAP_TOKEN = '<!--IMPORT_MAP-->'
 const container = ref()
 const isDarkmode = inject(IS_DARKMODE) as Ref<boolean>
 
@@ -94,7 +95,11 @@ function createSandbox() {
     importMap.imports = {}
   }
   importMap.imports.vue = vueRuntimeUrl.value
-  const sandboxSrc = s.toString().replace(/<!--IMPORT_MAP-->/, JSON.stringify(importMap))
+  const sandboxSrc = s.overwrite(
+    srcdoc.indexOf(IMPORT_MAP_TOKEN),
+    srcdoc.indexOf(IMPORT_MAP_TOKEN) + IMPORT_MAP_TOKEN.length,
+    JSON.stringify(importMap)
+  ).toString()
   sandbox.srcdoc = sandboxSrc
   container.value.appendChild(sandbox)
 
@@ -177,19 +182,7 @@ async function updatePreview() {
     await proxy.eval([
       `window.__modules__ = {};window.__css__ = '';window.__windicss__ = ''`,
       ...modules,
-      `
-import { createApp as _createApp } from "vue"
-
-if (window.__app__) {
-  window.__app__.unmount()
-  document.getElementById('app').innerHTML = ''
-}
-
-document.getElementById('__sfc-styles').innerHTML = window.__css__
-document.getElementById('__sfc-windicss').innerHTML = window.__windicss__
-const app = window.__app__ = _createApp(__modules__["${MAIN_FILE}"].default)
-app.config.errorHandler = e => console.error(e)
-app.mount('#app')`.trim(),
+      MAIN_CODE,
       applyStyles
     ])
   } catch (e) {
@@ -201,8 +194,6 @@ app.mount('#app')`.trim(),
 <style>
 .preview-container,
 iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
+  @apply w-full h-full border-none;
 }
 </style>
