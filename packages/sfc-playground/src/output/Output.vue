@@ -19,7 +19,7 @@
             v-else
             v-model="store.activeFile.compiled[mode]"
             readonly
-            :language="mode === 'css' ? 'css' : 'javascript'"
+            :language="/css|windicss/.test(mode) ? 'css' : 'javascript'"
           />
         </div>
       </div>
