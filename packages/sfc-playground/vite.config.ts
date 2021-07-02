@@ -3,7 +3,8 @@ import path from 'path'
 import { defineConfig, Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import WindiCSS from 'vite-plugin-windicss'
-import ViteIcons from 'vite-plugin-icons'
+import ViteComponents from 'vite-plugin-components'
+import ViteIcons, { ViteIconsResolver } from 'vite-plugin-icons'
 import execa from 'execa'
 
 const commit = execa.sync('git', ['rev-parse', 'HEAD']).stdout.slice(0, 7)
@@ -17,6 +18,11 @@ export default defineConfig({
       scan: {
         include: ['src/**/*.{vue,html,jsx,tsx}', 'index.html']
       }
+    }),
+    ViteComponents({
+      customComponentResolvers: ViteIconsResolver({
+        componentPrefix: ''
+      })
     }),
     ViteIcons()
   ],

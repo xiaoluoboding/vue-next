@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { provide } from 'vue'
-import Header from './Header.vue'
+import Header from './header/index.vue'
 import SplitPane from './components/SplitPane.vue'
 import Editor from './editor/Editor.vue'
 import Output from './output/Output.vue'
@@ -32,7 +32,6 @@ body {
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   color: var(--base);
   margin: 0;
-  /* background-color: #F1F5F9; */
   --base: #444;
   --nav-height: 50px;
   --font-code: 'Source Code Pro', monospace;
