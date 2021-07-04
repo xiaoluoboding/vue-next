@@ -14,8 +14,15 @@
       </template>
       <template #right>
         <div class="pane">
-          <div class="pane-title">
-            {{ activeSFC.isSetup ? 'Script Setup' : 'Script' }}
+          <div class="pane-title justify-between">
+            <div>
+              {{ activeSFC.isSetup ? 'Script Setup' : 'Script' }}
+            </div>
+            <!-- <div>
+              <button title="Switch Setup" class="console-btn" @click="">
+                <carbon-script-reference class="h-4 w-4" />
+              </button>
+            </div> -->
           </div>
           <div class="pane-code">
             <MonacoEditor v-model="activeSFC.script" language="javascript" />
@@ -38,25 +45,19 @@ const onChange = debounce((code: string) => {
   store.activeFile.code = code
 }, 250)
 
-const activeCode = ref(store.activeFile.code)
-const activeSFC = ref(store.activeFile.sfc)
+const activeSFC = computed(() => store.activeFile.sfc)
 const activeSFCCode = computed(() => store.activeSFCCode)
 
 watch(
   () => store.activeFilename,
-  () => {
-    activeCode.value = store.activeFile.code
-  }
+  () => onChange(activeSFCCode.value),
+  { deep: true }
 )
 
 watch(
   () => activeSFCCode.value,
-  (code) => {
-    onChange(code)
-  },
-  {
-    deep: true
-  }
+  (code) => onChange(code),
+  { deep: true }
 )
 </script>
 

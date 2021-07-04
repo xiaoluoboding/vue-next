@@ -3,10 +3,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, toRef, inject, watch, Ref } from 'vue'
+import { defineComponent, onMounted, ref, toRef, inject, watch, Ref, nextTick } from 'vue'
 import type { editor as Editor } from 'monaco-editor'
-import setupMonaco from './editor'
 
+import setupMonaco from './editor'
+import { debounce } from '@/utils'
 import { IS_DARKMODE } from '@/types'
 
 export default defineComponent({
@@ -23,6 +24,7 @@ export default defineComponent({
     const code = toRef(props, 'modelValue')
     const language = toRef(props, 'language')
     const readonly = toRef(props, 'readonly')
+    const isEditing = ref(false)
     let editorInstance: Editor.IStandaloneCodeEditor
 
     const isDarkmode = inject(IS_DARKMODE) as Ref<boolean>
@@ -81,20 +83,25 @@ export default defineComponent({
       editorInstance.onDidChangeModelContent(() => {
         const value = editorInstance.getValue()
         emit('update:modelValue', value)
+        isEditing.value = true
+        debounce(() => isEditing.value = false, 333)()
       })
     }
 
     watch(
       () => props.modelValue,
       (code) => {
-        readonly.value && setContent(code)
+        if (!isEditing.value || readonly.value) {
+          setContent(code)
+        }
       }
     )
 
     onMounted(init)
 
     return {
-      editorRef
+      editorRef,
+      isEditing
     }
   }
 })

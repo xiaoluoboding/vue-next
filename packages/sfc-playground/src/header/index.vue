@@ -165,8 +165,7 @@ h1 img {
   position: absolute;
   left: 0;
   top: 40px;
-  background-color: white;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   list-style-type: none;
   padding: 8px;
@@ -174,6 +173,7 @@ h1 img {
   width: 200px;
   max-height: calc(100vh - 70px);
   overflow: scroll;
+  @apply bg-white dark:bg-true-gray-800;
 }
 
 .versions a {
@@ -181,7 +181,7 @@ h1 img {
   padding: 6px 12px;
   text-decoration: none;
   cursor: pointer;
-  color: var(--base);
+  @apply text-dark-700 dark:text-true-gray-100;
 }
 
 .versions a:hover {

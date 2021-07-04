@@ -64,20 +64,26 @@ const handleClearConsole = () => clearErrors()
 const handleCollapseConsole = () => outputPaneSize.value = [100, 0]
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .tab-buttons {
-  border-bottom: 1px solid var(--border-color);
+  @apply border-b border-$border-color;
 }
 .tab-buttons button {
-  font-size: 13px;
-  font-family: var(--font-code);
-  padding: 8px 16px 6px;
+  @apply relative;
+  @apply py-2.5 px-4;
+  @apply text-[13px] leading-4;
   @apply box-border uppercase text-true-gray-500 dark:text-cool-gray-300;
+  font-family: var(--font-code);
 }
 
 button.active {
   color: var(--color-branding-dark) !important;
-  border-bottom: 3px solid var(--color-branding-dark);
+
+  &:before {
+    @apply content h-[3px] w-full;
+    @apply absolute left-0 bottom-0;
+    @apply bg-$color-branding-dark;
+  }
 }
 
 .console-btn {

@@ -1,7 +1,7 @@
 <template>
   <Header />
   <div class="wrapper">
-    <SplitPane>
+    <SplitPane :size="[40, 60]">
       <template #left>
         <Editor />
       </template>

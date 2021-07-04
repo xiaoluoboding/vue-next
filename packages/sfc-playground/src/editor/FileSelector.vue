@@ -5,20 +5,27 @@
       class="file"
       :class="{ active: store.activeFilename === file }"
       @click="setActive(file)">
+      <span><logos-vue /></span>
       <span class="label">{{ file }}</span>
       <span v-if="i > 0" class="remove" @click.stop="deleteFile(file)">
-        <svg width="12" height="12" viewBox="0 0 24 24" class="svelte-cghqrp"><line stroke="#999" x1="18" y1="6" x2="6" y2="18"></line><line stroke="#999" x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <carbon-close class="icon" />
       </span>
     </div>
-    <div v-if="pending" class="file" >
+    <div v-if="pending" class="file">
+      <logos-vue />
       <input
+        ref="filenameRef"
         v-model="pendingFilename"
+        class="bg-transparent outline-none focus:outline-none"
         spellcheck="false"
         @keyup.enter="doneAddFile"
         @keyup.esc="cancelAddFile"
-        @vnodeMounted="focus">
+        @vnodeMounted="focus"
+      />
     </div>
-    <button class="add" @click="startAddFile">+</button>
+    <button class="add" @click="startAddFile">
+      <carbon-add class="icon" />
+    </button>
   </div>
 </template>
 
@@ -26,7 +33,9 @@
 import { store, addFile, deleteFile, setActive } from '../store'
 import { ref } from 'vue'
 import type { VNode } from 'vue'
+import { useClickOutside } from '@/composable/useClickOutside'
 
+const filenameRef = ref<HTMLInputElement>()
 const pending = ref(false)
 const pendingFilename = ref('Comp.vue')
 
@@ -64,53 +73,58 @@ function doneAddFile() {
   addFile(filename)
   pendingFilename.value = 'Comp.vue'
 }
+
+useClickOutside(filenameRef, () => {
+  if (pending.value) doneAddFile()
+})
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .file-selector {
-  box-sizing: border-box;
-  border-bottom: 1px solid var(--border-color);
+  @apply flex box-border;
+  @apply text-dark-600 dark:text-true-gray-300;
+  @apply border-b border-$border-color;
 }
+
 .file {
-  display: inline-block;
-  font-size: 13px;
+  @apply inline-flex place-items-center;
+  @apply cursor-pointer box-border;
+  @apply px-2 border-r border-$border-color;
+  @apply text-[13px] leading-4;
   font-family: var(--font-code);
-  cursor: pointer;
-  color: #999;
-  box-sizing: border-box;
+
+  &.active {
+    @apply relative text-$color-branding cursor-text;
+
+    &:before {
+      @apply content h-[3px] w-full;
+      @apply absolute left-0 bottom-0;
+      @apply bg-$color-branding;
+    }
+  }
+
+  .label {
+    @apply inline-block;
+    @apply py-2.5 px-3;
+  }
+
+  input {
+    @apply bg-transparent outline-none focus:outline-none;
+    @apply w-32 rounded-[3px] px-1.5 py-1 ml-1.5;
+  }
 }
-.file.active {
-  color: var(--color-branding);
-  border-bottom: 3px solid var(--color-branding);
-  cursor: text;
+
+.file-selector .icon {
+  @apply cursor-pointer rounded-sm;
+  @apply text-dark-600 dark:text-true-gray-300;
+  @apply hover:bg-gray-200 hover:dark:bg-dark-300;
 }
-.file span {
-  display: inline-block;
-  padding: 8px 10px 6px;
-}
-.file input {
-  width: 80px;
-  outline: none;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  padding: 4px 6px;
-  margin-left: 6px;
-}
-.file .remove {
-  display: inline-block;
-  vertical-align: middle;
-  line-height: 12px;
-  cursor: pointer;
-  padding-left: 0;
-}
+
 .add {
-  font-size: 20px;
-  font-family: var(--font-code);
-  color: #999;
-  vertical-align: middle;
-  margin-left: 6px;
+  @apply ml-1.5 align-middle text-[20px];
 }
-.add:hover {
-  color: var(--color-branding);
+
+.add:hover svg {
+  color: var(--color-branding) !important;
 }
 </style>
