@@ -2,6 +2,7 @@ import { reactive, watchEffect } from 'vue'
 import { MagicString } from '@vue/compiler-sfc'
 import { compileFile, MAIN_FILE } from './compiler/sfcCompiler'
 import { utoa, atou } from './utils'
+import { FileSFC } from '@/types'
 
 const welcomeCode = `
 <template>
@@ -33,10 +34,12 @@ export class File {
   code: string
   sfc = {
     isSetup: false,
+    isScopedStyle: false,
     template: '',
     script: '',
+    setupScript: '',
     style: ''
-  }
+  } as FileSFC
 
   compiled = {
     js: '',
@@ -99,7 +102,9 @@ ${activeFile.sfc.isSetup ? '<script setup>' : '<script>'}
 `
     s.append(sfcCode)
     if (activeFile.sfc.style) {
-      const sfcStyle = `<style>
+      const sfcStyle = `${
+        activeFile.sfc.isScopedStyle ? '<style scoped>' : '<style>'
+      }
 ${activeFile.sfc.style}
 <\/style>`
       s.append(sfcStyle)

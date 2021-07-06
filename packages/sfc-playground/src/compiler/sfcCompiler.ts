@@ -78,21 +78,6 @@ export async function compileFile({ filename, code, sfc, compiled }: File) {
     return
   }
 
-  const dTemplateContent =
-    (descriptor.template && descriptor.template.content) || ''
-  const dScriptContent = (descriptor.script && descriptor.script.content) || ''
-  const dScriptSetupContent =
-    (descriptor.scriptSetup && descriptor.scriptSetup.content) || ''
-
-  // console.log(descriptor.template)
-  // console.log(descriptor.script)
-  // console.log(descriptor.scriptSetup)
-
-  sfc.isSetup =
-    (descriptor.scriptSetup && descriptor.scriptSetup.setup) || false
-  sfc.template = dTemplateContent.trim()
-  sfc.script = sfc.isSetup ? dScriptSetupContent.trim() : dScriptContent.trim()
-
   const hasScoped = descriptor.styles.some(s => s.scoped)
   let clientCode = ''
   let ssrCode = ''
@@ -290,6 +275,49 @@ function doCompileTemplate(
       `$1 ${fnName}`
     )}` + `\n${COMP_IDENTIFIER}.${fnName} = ${fnName}`
   )
+}
+
+export async function resetSFCCode({ filename, code, sfc }: File) {
+  if (filename && code) {
+    const { errors, descriptor } = SFCCompiler.parse(code, {
+      filename,
+      sourceMap: true
+    })
+
+    if (errors.length) {
+      store.errors = errors
+      return
+    }
+
+    let sfcCss = ''
+    const dTemplateContent =
+      (descriptor.template && descriptor.template.content) || ''
+    const dScriptContent =
+      (descriptor.script && descriptor.script.content) || ''
+    const dScriptSetupContent =
+      (descriptor.scriptSetup && descriptor.scriptSetup.content) || ''
+
+    // console.log(descriptor.template)
+    // console.log(descriptor.script)
+    // console.log(descriptor.scriptSetup)
+    // console.log(descriptor.styles)
+
+    sfc.isSetup =
+      (descriptor.scriptSetup && descriptor.scriptSetup.setup) || false
+    sfc.template = dTemplateContent.trim()
+    sfc.script = sfc.isSetup
+      ? dScriptSetupContent.trim()
+      : dScriptContent.trim()
+    sfc.setupScript = dScriptSetupContent.trim()
+
+    for (const style of descriptor.styles) {
+      sfcCss += style.content + '\n'
+    }
+
+    if (sfcCss) {
+      sfc.style = sfcCss.trim()
+    }
+  }
 }
 
 async function hashId(filename: string) {

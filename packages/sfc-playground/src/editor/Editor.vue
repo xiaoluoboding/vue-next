@@ -8,7 +8,7 @@
             Template
           </div>
           <div class="pane-code">
-            <MonacoEditor v-model="activeSFC.template" language="html" />
+            <MonacoEditor v-model:code="activeSFC.template" language="html" />
           </div>
         </div>
       </Pane>
@@ -18,24 +18,33 @@
             <div>
               {{ activeSFC.isSetup ? 'Script Setup' : 'Script' }}
             </div>
-            <!-- <div>
-              <button title="Switch Setup" class="console-btn" @click="">
-                <carbon-script-reference class="h-4 w-4" />
+            <div>
+              <button title="Toggle Script Setup" class="console-btn flex" @click="activeSFC.isSetup = !activeSFC.isSetup">
+                <carbon-letter-ss class="h-6 w-6" v-show="activeSFC.isSetup" />
+                <mdi-alpha-s class="h-6 w-6" v-show="!activeSFC.isSetup" />
               </button>
-            </div> -->
+            </div>
           </div>
           <div class="pane-code">
-            <MonacoEditor v-model="activeSFC.script" language="javascript" />
+            <MonacoEditor v-model:code="activeSFC.script" language="javascript" />
           </div>
         </div>
       </Pane>
       <Pane>
         <div class="pane">
-          <div class="pane-title">
-            Style
+          <div class="pane-title justify-between">
+            <div>
+              {{ activeSFC.isScopedStyle ? 'Style Scoped' : 'Style' }}
+            </div>
+            <div>
+              <button title="Toggle Style Scoped" class="console-btn flex" @click="activeSFC.isScopedStyle = !activeSFC.isScopedStyle">
+                <carbon-letter-ss class="h-6 w-6" v-show="activeSFC.isScopedStyle" />
+                <mdi-alpha-s class="h-6 w-6" v-show="!activeSFC.isScopedStyle" />
+              </button>
+            </div>
           </div>
           <div class="pane-code">
-            <MonacoEditor v-model="activeSFC.style" language="css" />
+            <MonacoEditor v-model:code="activeSFC.style" language="css" />
           </div>
         </div>
       </Pane>
@@ -44,11 +53,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { watch, computed, onMounted } from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 
 import FileSelector from './FileSelector.vue'
 import MonacoEditor from '@/components/monaco/index.vue'
+import { resetSFCCode } from '@/compiler/sfcCompiler'
 import { store } from '@/store'
 import { debounce } from '@/utils'
 
@@ -58,6 +68,8 @@ const onChange = debounce((code: string) => {
 
 const activeSFC = computed(() => store.activeFile.sfc)
 const activeSFCCode = computed(() => store.activeSFCCode)
+
+onMounted(() => resetSFCCode(store.activeFile))
 
 watch(
   () => store.activeFilename,

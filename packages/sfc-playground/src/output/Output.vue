@@ -11,13 +11,16 @@
       </button>
     </div>
     <div class="h-full">
-      <Splitpanes horizontal @resize="paneSize = $event[0].size">
+      <Splitpanes
+        horizontal
+        @resize="paneSize = $event[0].size"
+      >
         <Pane :size="paneSize">
           <div class="output-container relative h-full overflow-hidden flex-1 box-border">
             <Preview v-if="mode === 'preview'" />
             <MonacoEditor
               v-else
-              v-model="store.activeFile.compiled[mode]"
+              v-model:code="store.activeFile.compiled[mode]"
               readonly
               :language="/css|windicss/.test(mode) ? 'css' : 'javascript'"
             />

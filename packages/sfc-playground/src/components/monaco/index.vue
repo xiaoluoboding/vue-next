@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, toRef, inject, watch, Ref, nextTick } from 'vue'
+import { defineComponent, onMounted, ref, toRef, inject, watch, Ref } from 'vue'
 import type { editor as Editor } from 'monaco-editor'
 
 import setupMonaco from './editor'
@@ -14,14 +14,15 @@ export default defineComponent({
   name: 'MonacoEditor',
 
   props: {
-    modelValue: { type: String, default: '' },
+    code: { type: String, default: '' },
+    value: { type: String, default: '' },
     language: { type: String, default: 'javascript' },
     readonly: { type: Boolean, default: false }
   },
 
   setup (props, { emit }) {
     const editorRef = ref()
-    const code = toRef(props, 'modelValue')
+    const code = toRef(props, 'code')
     const language = toRef(props, 'language')
     const readonly = toRef(props, 'readonly')
     const isEditing = ref(false)
@@ -82,14 +83,14 @@ export default defineComponent({
 
       editorInstance.onDidChangeModelContent(() => {
         const value = editorInstance.getValue()
-        emit('update:modelValue', value)
+        emit('update:code', value)
         isEditing.value = true
         debounce(() => isEditing.value = false, 333)()
       })
     }
 
     watch(
-      () => props.modelValue,
+      () => props.code,
       (code) => {
         if (!isEditing.value || readonly.value) {
           setContent(code)
