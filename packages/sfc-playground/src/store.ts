@@ -1,6 +1,6 @@
 import { reactive, watchEffect } from 'vue'
 import { MagicString } from '@vue/compiler-sfc'
-import { compileFile, MAIN_FILE } from './compiler/sfcCompiler'
+import { resetSFCCode, compileFile, MAIN_FILE } from './compiler/sfcCompiler'
 import { utoa, atou } from './utils'
 import { FileSFC } from '@/types'
 
@@ -71,6 +71,7 @@ if (savedFiles) {
   const saved = JSON.parse(atou(savedFiles))
   for (const filename in saved) {
     files[filename] = new File(filename, saved[filename])
+    resetSFCCode(files[filename])
   }
 } else {
   files = {

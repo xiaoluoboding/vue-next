@@ -19,7 +19,7 @@
               {{ activeSFC.isSetup ? 'Script Setup' : 'Script' }}
             </div>
             <div>
-              <button title="Toggle Script Setup" class="console-btn flex" @click="activeSFC.isSetup = !activeSFC.isSetup">
+              <button title="Toggle Script Setup" class="editor-btn flex" @click="handleToggleSetup">
                 <carbon-letter-ss class="h-6 w-6" v-show="activeSFC.isSetup" />
                 <mdi-alpha-s class="h-6 w-6" v-show="!activeSFC.isSetup" />
               </button>
@@ -37,7 +37,7 @@
               {{ activeSFC.isScopedStyle ? 'Style Scoped' : 'Style' }}
             </div>
             <div>
-              <button title="Toggle Style Scoped" class="console-btn flex" @click="activeSFC.isScopedStyle = !activeSFC.isScopedStyle">
+              <button title="Toggle Style Scoped" class="editor-btn flex" @click="activeSFC.isScopedStyle = !activeSFC.isScopedStyle">
                 <carbon-letter-ss class="h-6 w-6" v-show="activeSFC.isScopedStyle" />
                 <mdi-alpha-s class="h-6 w-6" v-show="!activeSFC.isScopedStyle" />
               </button>
@@ -53,12 +53,11 @@
 </template>
 
 <script setup lang="ts">
-import { watch, computed, onMounted } from 'vue'
+import { watch, computed } from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 
 import FileSelector from './FileSelector.vue'
 import MonacoEditor from '@/components/monaco/index.vue'
-import { resetSFCCode } from '@/compiler/sfcCompiler'
 import { store } from '@/store'
 import { debounce } from '@/utils'
 
@@ -68,8 +67,6 @@ const onChange = debounce((code: string) => {
 
 const activeSFC = computed(() => store.activeFile.sfc)
 const activeSFCCode = computed(() => store.activeSFCCode)
-
-onMounted(() => resetSFCCode(store.activeFile))
 
 watch(
   () => store.activeFilename,
@@ -82,6 +79,10 @@ watch(
   (code) => onChange(code),
   { deep: true }
 )
+
+const handleToggleSetup = () => {
+  activeSFC.value.isSetup = !activeSFC.value.isSetup
+}
 </script>
 
 <style scoped>
@@ -89,5 +90,9 @@ watch(
   height: calc(100% - 35px);
   overflow: hidden;
   position: relative;
+}
+.editor-btn {
+  @apply text-xs cursor-pointer px-2 py-1;
+  @apply hover:bg-gray-100 hover:dark:bg-true-gray-700
 }
 </style>
