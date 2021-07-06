@@ -1,53 +1,55 @@
 <template>
-  <SplitPane horizontal allow-push :size="outputPaneSize">
-    <template #left>
-      <div class="preview-pane flex flex-col h-full">
-        <div class="tab-buttons h-9 box-border">
-          <button
-            v-for="m of modes"
-            :key="m"
-            :class="{ active: mode === m }"
-            @click="mode = m"
-          >
-            {{ m }}
-          </button>
-        </div>
-
-        <div class="output-container relative overflow-hidden flex-1 box-border">
-          <Preview v-if="mode === 'preview'" />
-          <MonacoEditor
-            v-else
-            v-model="store.activeFile.compiled[mode]"
-            readonly
-            :language="/css|windicss/.test(mode) ? 'css' : 'javascript'"
-          />
-        </div>
-      </div>
-    </template>
-    <template #right>
-      <div class="pane console-pane">
-        <div class="pane-title justify-between">
-          <div>
-            <span>Console</span>
+  <div class="preview-pane flex flex-col h-full">
+    <div class="tab-buttons h-9 box-border">
+      <button
+        v-for="m of modes"
+        :key="m"
+        :class="{ active: mode === m }"
+        @click="mode = m"
+      >
+        {{ m }}
+      </button>
+    </div>
+    <div class="h-full">
+      <Splitpanes horizontal @resize="paneSize = $event[0].size">
+        <Pane :size="paneSize">
+          <div class="output-container relative h-full overflow-hidden flex-1 box-border">
+            <Preview v-if="mode === 'preview'" />
+            <MonacoEditor
+              v-else
+              v-model="store.activeFile.compiled[mode]"
+              readonly
+              :language="/css|windicss/.test(mode) ? 'css' : 'javascript'"
+            />
           </div>
-          <div class="space-x-2">
-            <button title="Clear Console" class="console-btn" @click="handleClearConsole">
-              <carbon-error class="h-4 w-4" />
-            </button>
-            <button title="Collapse Console" class="console-btn" @click="handleCollapseConsole">
-              <carbon-down-to-bottom class="h-4 w-4" />
-            </button>
+        </Pane>
+        <Pane :size="100 - paneSize">
+          <div class="pane console-pane">
+            <div class="pane-title justify-between">
+              <div>
+                <span>Console</span>
+              </div>
+              <div class="space-x-2">
+                <button title="Clear Console" class="console-btn" @click="handleClearConsole">
+                  <carbon-error class="h-4 w-4" />
+                </button>
+                <button title="Collapse Console" class="console-btn" @click="handleCollapseConsole">
+                  <carbon-down-to-bottom class="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <div class="pane-code">
+              <Console />
+            </div>
           </div>
-        </div>
-        <div class="pane-code">
-          <Console />
-        </div>
-      </div>
-    </template>
-  </SplitPane>
+        </Pane>
+      </Splitpanes>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { Splitpanes, Pane } from 'splitpanes'
 import Preview from './Preview.vue'
 import Console from './Console.vue'
 import MonacoEditor from '@/components/monaco/index.vue'
@@ -58,10 +60,10 @@ const modes = ['preview', 'js', 'css', 'windicss', 'ssr'] as const
 
 type Modes = typeof modes[number]
 const mode = ref<Modes>('preview')
-const outputPaneSize = ref([80, 20])
+const paneSize = ref(80)
 
 const handleClearConsole = () => clearErrors()
-const handleCollapseConsole = () => outputPaneSize.value = [100, 0]
+const handleCollapseConsole = () => paneSize.value = 100
 </script>
 
 <style lang="scss" scoped>

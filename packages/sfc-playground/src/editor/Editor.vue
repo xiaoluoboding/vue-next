@@ -1,8 +1,8 @@
 <template>
   <FileSelector />
   <div class="editor-container">
-    <SplitPane horizontal>
-      <template #left>
+    <Splitpanes horizontal>
+      <Pane >
         <div class="pane">
           <div class="pane-title">
             Template
@@ -11,8 +11,8 @@
             <MonacoEditor v-model="activeSFC.template" language="html" />
           </div>
         </div>
-      </template>
-      <template #right>
+      </Pane>
+      <Pane>
         <div class="pane">
           <div class="pane-title justify-between">
             <div>
@@ -28,16 +28,27 @@
             <MonacoEditor v-model="activeSFC.script" language="javascript" />
           </div>
         </div>
-      </template>
-    </SplitPane>
+      </Pane>
+      <Pane>
+        <div class="pane">
+          <div class="pane-title">
+            Style
+          </div>
+          <div class="pane-code">
+            <MonacoEditor v-model="activeSFC.style" language="css" />
+          </div>
+        </div>
+      </Pane>
+    </SplitPanes>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import { Splitpanes, Pane } from 'splitpanes'
+
 import FileSelector from './FileSelector.vue'
 import MonacoEditor from '@/components/monaco/index.vue'
-import SplitPane from '@/components/SplitPane.vue'
 import { store } from '@/store'
 import { debounce } from '@/utils'
 

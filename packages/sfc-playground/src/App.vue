@@ -1,14 +1,14 @@
 <template>
   <Header />
   <div class="wrapper">
-    <SplitPane :size="[40, 60]">
-      <template #left>
+    <Splitpanes class="default-theme">
+      <Pane size="40">
         <Editor />
-      </template>
-      <template #right>
+      </Pane>
+      <Pane size="60">
         <Output />
-      </template>
-    </SplitPane>
+      </Pane>
+    </Splitpanes>
   </div>
 </template>
 
@@ -17,6 +17,8 @@ import { provide } from 'vue'
 import Header from './header/index.vue'
 import Editor from './editor/Editor.vue'
 import Output from './output/Output.vue'
+import { Splitpanes, Pane } from 'splitpanes'
+import 'splitpanes/dist/splitpanes.css'
 
 import { useDark } from '@/composable/useDark'
 import { IS_DARKMODE } from './types'
