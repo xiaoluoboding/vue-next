@@ -82,6 +82,10 @@ watch(
 
 const handleToggleSetup = () => {
   activeSFC.value.isSetup = !activeSFC.value.isSetup
+  // switch script & setup script
+  let tempScript = activeSFC.value.script
+  activeSFC.value.script = activeSFC.value.setupScript
+  activeSFC.value.setupScript = tempScript
 }
 </script>
 

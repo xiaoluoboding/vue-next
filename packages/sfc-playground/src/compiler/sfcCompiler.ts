@@ -1,8 +1,13 @@
 import { store, File } from '../store'
-import { SFCDescriptor, BindingMetadata } from '@vue/compiler-sfc'
+import {
+  SFCDescriptor,
+  BindingMetadata,
+  SFCScriptBlock
+} from '@vue/compiler-sfc'
 import * as defaultCompiler from '@vue/compiler-sfc'
 import { generateStyles } from './windiCompiler'
 import { ref } from 'vue'
+import { Node } from '@babel/types'
 
 export const MAIN_FILE = 'App.vue'
 export const COMP_IDENTIFIER = `__sfc__`
@@ -98,6 +103,8 @@ export async function compileFile({ filename, code, sfc, compiled }: File) {
   // the render fn is inlined.
   if (descriptor.scriptSetup) {
     const ssrScriptResult = await doCompileScript(descriptor, id, true)
+    const scriptResult = await doTranspiledSetupScript(descriptor, id, false)
+    sfc.setupScript = scriptResult
     if (ssrScriptResult) {
       ssrCode += ssrScriptResult[0]
     } else {
@@ -241,6 +248,181 @@ async function doCompileScript(
   } else {
     return [`\nconst ${COMP_IDENTIFIER} = {}`, undefined]
   }
+}
+
+export async function doTranspiledSetupScript(
+  descriptor: SFCDescriptor,
+  id: string,
+  ssr: boolean
+): Promise<string | undefined> {
+  if (descriptor.script || descriptor.scriptSetup) {
+    try {
+      const compiledScript = SFCCompiler.compileScript(descriptor, {
+        id,
+        refSugar: true,
+        inlineTemplate: true,
+        templateOptions: {
+          ssr,
+          ssrCssVars: descriptor.cssVars
+        }
+      })
+
+      return transpileSetupScript(descriptor, compiledScript)
+    } catch (e) {
+      store.errors = [
+        e.stack
+          .split('\n')
+          .slice(0, 12)
+          .join('\n')
+      ]
+      return
+    }
+  } else {
+    return ''
+  }
+}
+
+function transpileSetupScript(
+  descriptor: SFCDescriptor,
+  scriptBlock: SFCScriptBlock
+) {
+  const scriptContent = scriptBlock.content.trim()
+  const s = new SFCCompiler.MagicString(scriptContent)
+  const scriptResult = new SFCCompiler.MagicString('')
+  let bindingKeys = Object.keys(scriptBlock.bindings)
+  let offset = 0
+  let componentMap = {}
+  let vnodeMap = {}
+
+  const scriptAst = SFCCompiler.babelParse(scriptContent, {
+    sourceType: 'module'
+  })
+
+  for (const node of scriptAst.program.body) {
+    const start = node.start!
+    let end = node.end!
+    // locate comment
+    if (node.trailingComments && node.trailingComments.length > 0) {
+      const lastCommentNode =
+        node.trailingComments[node.trailingComments.length - 1]
+      end = lastCommentNode.end
+    }
+    // locate the end of whitespace between this statement and the next
+    while (end <= descriptor.source.length) {
+      if (!/\s/.test(descriptor.source.charAt(end))) {
+        break
+      }
+      end++
+    }
+
+    if (node.type === 'ImportDeclaration') {
+      // Step 1. remove compiled script import declaration using `@vue/runtime-core api`
+      if (node.specifiers.length && node.source.value === 'vue') {
+        const localSpecs = node.specifiers
+          .map(spec => spec.local.name)
+          .join(',')
+
+        if (
+          /_toDisplayString|_createVNode|_Fragment|_openBlock|_createBlock/.test(
+            localSpecs
+          )
+        ) {
+          offset = node.end! - node.start
+          s.remove(node.start!, node.end!)
+        }
+      }
+      // Step 2. record user imported components
+      if (node.source.value && node.source.value.endsWith('.vue')) {
+        // eg ./HelloWorld.vue
+        const localSpecNames = node.specifiers
+          .map(spec => spec.local.name)
+          .join('')
+        // {"./HelloWorld.vue" => "HelloWorld"}
+        componentMap[node.source.value] = localSpecNames
+      }
+    }
+
+    if (node.type === 'ExportDefaultDeclaration') {
+      let hasWalkCtx = false
+      ;(SFCCompiler.walk as any)(node, {
+        enter(node: Node) {
+          if (node.type === 'ReturnStatement') {
+            ;(SFCCompiler.walk as any)(node, {
+              enter(returnNode: Node, returnNodeParent: Node) {
+                if (
+                  returnNode.type === 'Identifier' &&
+                  returnNode.name === '_createBlock'
+                ) {
+                  const vnodeIdentifier = scriptContent.slice(
+                    returnNodeParent.start,
+                    returnNodeParent.end
+                  )
+                  vnodeMap[
+                    `${returnNode.start}${returnNode.end}`
+                  ] = vnodeIdentifier
+                }
+
+                // remove export default return statement
+                if (
+                  returnNode.type === 'Identifier' &&
+                  returnNode.name === '_ctx'
+                ) {
+                  if (hasWalkCtx) {
+                    this.skip()
+                  } else {
+                    s.remove(node.start!, node.end!)
+                    s.appendRight(
+                      node.start!,
+                      '\treturn {\n\t\t__RETURN__PROPERTY__\n\t}'
+                    )
+                  }
+                  hasWalkCtx = true
+                }
+              }
+            })
+          }
+        }
+      })
+    }
+  }
+
+  // Step 4. inject components property
+  ;(function injectComponentsProperty() {
+    const exportDefaultToken = 'export default {'
+    const exportDefaultIdx = s.toString().indexOf(exportDefaultToken)
+    if (Object.values(componentMap).length > 0) {
+      const componentsProperty = `\n\tcomponents: { ${Object.values(
+        componentMap
+      ).join(',')} },`
+      s.appendRight(
+        exportDefaultIdx + exportDefaultToken.length + offset,
+        componentsProperty
+      )
+    }
+  })()
+
+  // Step 5. inject return property
+  ;(function injectReturnProperty() {
+    const vnodes = Object.values(vnodeMap).join(',')
+    const components = Object.values(componentMap).join(',')
+    // choose vnode property, unchoose component property
+    const returnBindings = bindingKeys
+      .filter(key => {
+        return vnodes.indexOf(key) !== -1 && components.indexOf(key) === -1
+      })
+      .join(',')
+
+    // TODO try yo use s.overwrite()
+    const content = s.toString().replace('__RETURN__PROPERTY__', returnBindings)
+
+    scriptResult.append(content)
+  })()
+
+  console.group('--- Transpile SetupScript To Script ---')
+  console.log(scriptResult.toString())
+  console.groupEnd()
+
+  return scriptResult.toString()
 }
 
 function doCompileTemplate(

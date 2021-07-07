@@ -2,10 +2,10 @@
   <Header />
   <div class="wrapper">
     <Splitpanes class="default-theme">
-      <Pane size="40">
+      <Pane size="50">
         <Editor />
       </Pane>
-      <Pane size="60">
+      <Pane size="50">
         <Output />
       </Pane>
     </Splitpanes>
