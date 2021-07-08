@@ -1,7 +1,8 @@
 <template>
   <FileSelector />
   <div class="editor-container">
-    <Splitpanes horizontal>
+    <MonacoEditor v-model:code="store.activeFile.code" language="json" v-show="isImportmap" />
+    <Splitpanes horizontal v-show="!isImportmap">
       <Pane size="25">
         <div class="pane">
           <div class="pane-title">
@@ -71,16 +72,17 @@ const onChange = debounce((code: string) => {
 
 const activeSFC = computed(() => store.activeFile.sfc)
 const activeSFCCode = computed(() => store.activeSFCCode)
+const isImportmap = computed(() => store.activeFile.filename === 'import-map.json')
 
 watch(
   () => store.activeFilename,
-  () => onChange(activeSFCCode.value),
+  () => !isImportmap.value && onChange(activeSFCCode.value),
   { deep: true }
 )
 
 watch(
   () => activeSFCCode.value,
-  (code) => onChange(code),
+  (code) => !isImportmap.value && onChange(code),
   { deep: true }
 )
 

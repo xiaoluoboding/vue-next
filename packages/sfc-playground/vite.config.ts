@@ -39,8 +39,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          htmlWorker: [`${prefix}/languages/html/html.worker`],
-          cssWorker: [`${prefix}/languages/css/css.worker`],
+          htmlWorker: [`${prefix}/language/html/html.worker`],
+          cssWorker: [`${prefix}/language/css/css.worker`],
+          jsonWorker: [`${prefix}/language/json/json.worker`],
           tsWorker: [`${prefix}/language/typescript/ts.worker`],
           editorWorker: [`${prefix}/editor/editor.worker`]
         }

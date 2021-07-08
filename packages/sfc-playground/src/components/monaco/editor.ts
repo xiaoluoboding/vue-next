@@ -34,12 +34,14 @@ const setup = async () => {
         { default: EditorWorker },
         { default: HtmlWorker },
         { default: CSSWorker },
-        { default: TsWorker }
+        { default: TsWorker },
+        { default: JSONWorker }
       ] = await Promise.all([
         import('monaco-editor/esm/vs/editor/editor.worker.js?worker'),
         import('monaco-editor/esm/vs/language/html/html.worker.js?worker'),
         import('monaco-editor/esm/vs/language/css/css.worker.js?worker'),
-        import('monaco-editor/esm/vs/language/typescript/ts.worker.js?worker')
+        import('monaco-editor/esm/vs/language/typescript/ts.worker.js?worker'),
+        import('monaco-editor/esm/vs/language/json/json.worker.js?worker')
       ])
 
       // @ts-expect-error
@@ -47,6 +49,7 @@ const setup = async () => {
         getWorker(_: any, label: string) {
           if (label === 'html') return new HtmlWorker()
           if (label === 'css') return new CSSWorker()
+          if (label === 'json') return new JSONWorker()
           if (label === 'typescript' || label === 'javascript')
             return new TsWorker()
           return new EditorWorker()
