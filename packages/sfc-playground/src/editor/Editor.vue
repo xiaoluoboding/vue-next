@@ -2,7 +2,7 @@
   <FileSelector />
   <div class="editor-container">
     <Splitpanes horizontal>
-      <Pane >
+      <Pane size="25">
         <div class="pane">
           <div class="pane-title">
             Template
@@ -12,34 +12,38 @@
           </div>
         </div>
       </Pane>
-      <Pane>
+      <Pane size="50">
         <div class="pane">
           <div class="pane-title justify-between">
             <div>
               {{ activeSFC.isSetup ? 'Script Setup' : 'Script' }}
             </div>
-            <div>
-              <button title="Toggle Script Setup" class="editor-btn flex" @click="handleToggleSetup">
+            <div class="flex">
+              <button title="Toggle Script Language" class="editor-btn" @click="handleToggleLang">
+                <logos-javascript class="h-4 w-4" v-show="!activeSFC.isTS" />
+                <logos-typescript-icon class="h-4 w-4" v-show="activeSFC.isTS" />
+              </button>
+              <button title="Toggle Script Setup" class="editor-btn" @click="handleToggleSetup">
                 <carbon-letter-ss class="h-6 w-6" v-show="activeSFC.isSetup" />
-                <mdi-alpha-s class="h-6 w-6" v-show="!activeSFC.isSetup" />
+                <carbon-s class="h-6 w-6" v-show="!activeSFC.isSetup" />
               </button>
             </div>
           </div>
           <div class="pane-code">
-            <MonacoEditor v-model:code="activeSFC.script" language="javascript" />
+            <MonacoEditor v-model:code="activeSFC.script" :language="activeSFC.isTS ? 'typescript' : 'javascript'" />
           </div>
         </div>
       </Pane>
-      <Pane>
+      <Pane size="25">
         <div class="pane">
           <div class="pane-title justify-between">
             <div>
-              {{ activeSFC.isScopedStyle ? 'Style Scoped' : 'Style' }}
+              {{ activeSFC.hasScoped ? 'Style Scoped' : 'Style' }}
             </div>
             <div>
-              <button title="Toggle Style Scoped" class="editor-btn flex" @click="activeSFC.isScopedStyle = !activeSFC.isScopedStyle">
-                <carbon-letter-ss class="h-6 w-6" v-show="activeSFC.isScopedStyle" />
-                <mdi-alpha-s class="h-6 w-6" v-show="!activeSFC.isScopedStyle" />
+              <button title="Toggle Style Scoped" class="editor-btn flex" @click="activeSFC.hasScoped = !activeSFC.hasScoped">
+                <carbon-letter-ss class="h-6 w-6" v-show="activeSFC.hasScoped" />
+                <carbon-s class="h-6 w-6" v-show="!activeSFC.hasScoped" />
               </button>
             </div>
           </div>
@@ -86,6 +90,10 @@ const handleToggleSetup = () => {
   let tempScript = activeSFC.value.script
   activeSFC.value.script = activeSFC.value.setupScript
   activeSFC.value.setupScript = tempScript
+}
+
+const handleToggleLang = () => {
+  activeSFC.value.isTS = !activeSFC.value.isTS
 }
 </script>
 

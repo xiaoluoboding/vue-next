@@ -81,6 +81,14 @@ export default defineComponent({
         { immediate: true }
       )
 
+      watch(
+        () => language.value,
+        (lang) => {
+          monaco.editor.setModelLanguage(model, lang)
+        },
+        { immediate: true }
+      )
+
       editorInstance.onDidChangeModelContent(() => {
         const value = editorInstance.getValue()
         emit('update:code', value)

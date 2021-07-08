@@ -34,7 +34,8 @@ export class File {
   code: string
   sfc = {
     isSetup: false,
-    isScopedStyle: false,
+    hasScoped: false,
+    isTS: false,
     template: '',
     script: '',
     setupScript: '',
@@ -92,20 +93,30 @@ export const store: Store = reactive({
   get activeSFCCode() {
     const s = new MagicString('')
     const activeFile = store.files[store.activeFilename]
+    const isTS = activeFile.sfc.isTS
+    const isSetup = activeFile.sfc.isSetup
+    const hasScoped = activeFile.sfc.hasScoped
+    let scriptTagMap = {
+      '00': '<script>',
+      '01': '<script setup>',
+      '10': '<script lang="ts">',
+      '11': '<script setup lang="ts">'
+    }
 
-    const sfcCode = `<template>
-  ${activeFile.sfc.template}
-<\/template>
+    const sfcTemplate = `<template>
+${activeFile.sfc.template}
+<\/template>`
 
-${activeFile.sfc.isSetup ? '<script setup>' : '<script>'}
-  ${activeFile.sfc.script}
+    s.append(sfcTemplate)
+
+    const sfcScript = `\n${scriptTagMap[~~isTS + '' + ~~isSetup]}
+${activeFile.sfc.script}
 <\/script>
 `
-    s.append(sfcCode)
+    s.append(sfcScript)
+
     if (activeFile.sfc.style) {
-      const sfcStyle = `${
-        activeFile.sfc.isScopedStyle ? '<style scoped>' : '<style>'
-      }
+      const sfcStyle = `${hasScoped ? '<style scoped>' : '<style>'}
 ${activeFile.sfc.style}
 <\/style>`
       s.append(sfcStyle)

@@ -63,7 +63,7 @@ const modes = ['preview', 'js', 'css', 'windicss', 'ssr'] as const
 
 type Modes = typeof modes[number]
 const mode = ref<Modes>('preview')
-const paneSize = ref(80)
+const paneSize = ref(75)
 
 const handleClearConsole = () => clearErrors()
 const handleCollapseConsole = () => paneSize.value = 100

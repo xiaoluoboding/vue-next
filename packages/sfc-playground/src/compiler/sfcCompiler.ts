@@ -226,9 +226,6 @@ async function doCompileScript(
         `\n` +
         SFCCompiler.rewriteDefault(compiledScript.content, COMP_IDENTIFIER)
 
-      // console.log(compiledScript)
-      // console.log(compiledScript.content.trim())
-
       if ((descriptor.script || descriptor.scriptSetup)!.lang === 'ts') {
         code = (await import('sucrase')).transform(code, {
           transforms: ['typescript']
@@ -342,6 +339,31 @@ function transpileSetupScript(
       }
     }
 
+    if (node.type === 'VariableDeclaration') {
+      // Step 3. remove _withScopedId variable declaration
+      const hasWithScoped = node.declarations.some(d => d.id.name === '_withId')
+      const hasHoisted = node.declarations.some(d =>
+        /_hoisted_/.test(d.id.name)
+      )
+
+      if (hasWithScoped || hasHoisted) {
+        offset += node.end! - node.start!
+        s.remove(node.start!, node.end!)
+      }
+    }
+
+    if (node.type === 'ExpressionStatement') {
+      // Step 4. remove _pushScopeId >---< _popScopeId() expression statement
+      const hasPushScopeExpression =
+        node.expression.callee.name === '_pushScopeId'
+      const hasPopScopeExpression =
+        node.expression.callee.name === '_popScopeId'
+      if (hasPushScopeExpression || hasPopScopeExpression) {
+        offset += node.end! - node.start!
+        s.remove(node.start!, node.end!)
+      }
+    }
+
     if (node.type === 'ExportDefaultDeclaration') {
       let hasWalkCtx = false
       ;(SFCCompiler.walk as any)(node, {
@@ -362,7 +384,7 @@ function transpileSetupScript(
                   ] = vnodeIdentifier
                 }
 
-                // remove export default return statement
+                // Step 5. remove export default return statement
                 if (
                   returnNode.type === 'Identifier' &&
                   returnNode.name === '_ctx'
@@ -386,7 +408,7 @@ function transpileSetupScript(
     }
   }
 
-  // Step 4. inject components property
+  // Step 6. inject components property
   ;(function injectComponentsProperty() {
     const exportDefaultToken = 'export default {'
     const exportDefaultIdx = s.toString().indexOf(exportDefaultToken)
@@ -401,7 +423,7 @@ function transpileSetupScript(
     }
   })()
 
-  // Step 5. inject return property
+  // Step 7. inject return property
   ;(function injectReturnProperty() {
     const vnodes = Object.values(vnodeMap).join(',')
     const components = Object.values(componentMap).join(',')
@@ -418,11 +440,13 @@ function transpileSetupScript(
     scriptResult.append(content)
   })()
 
-  console.group('--- Transpile SetupScript To Script ---')
-  console.log(scriptResult.toString())
-  console.groupEnd()
+  // console.group('--- Transpile SetupScript To Script ---')
+  // console.log(offset)
+  // console.log(scriptContent)
+  // console.log(scriptResult.toString().trim())
+  // console.groupEnd()
 
-  return scriptResult.toString()
+  return scriptResult.toString().trim()
 }
 
 function doCompileTemplate(
@@ -478,6 +502,9 @@ export async function resetSFCCode({ filename, code, sfc }: File) {
       (descriptor.script && descriptor.script.content) || ''
     const dScriptSetupContent =
       (descriptor.scriptSetup && descriptor.scriptSetup.content) || ''
+    const scriptLang =
+      (descriptor.script && descriptor.script.lang) ||
+      (descriptor.scriptSetup && descriptor.scriptSetup.lang)
 
     // console.log(descriptor.template)
     // console.log(descriptor.script)
@@ -486,6 +513,8 @@ export async function resetSFCCode({ filename, code, sfc }: File) {
 
     sfc.isSetup =
       (descriptor.scriptSetup && descriptor.scriptSetup.setup) || false
+    sfc.isTS = scriptLang && scriptLang === 'ts'
+    sfc.hasScoped = descriptor.styles.some(s => s.scoped)
     sfc.template = dTemplateContent.trim()
     sfc.script = sfc.isSetup
       ? dScriptSetupContent.trim()
