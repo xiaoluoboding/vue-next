@@ -21,19 +21,22 @@
         </ul>
       </div>
       <div class="actions flex items-center">
-        <button class="share" @click="copyLink">
+        <button class="actions--btn share" @click="copyLink">
           <carbon-share class="h-5 w-5" />
         </button>  
-        <button class="download" @click="downloadProject">
+        <button class="actions--btn download" @click="downloadProject">
           <carbon-download class="h-5 w-5" />
         </button>
-        <button class="darkmode" v-if="isDarkmode" @click="isDarkmode = !isDarkmode">
-          <carbon-moon class="h-5 w-5" />
+        <button class="actions--btn darkmode" @click="isDarkmode = !isDarkmode">
+          <carbon-moon class="h-5 w-5" v-if="isDarkmode" />
+          <carbon-sun class="h-5 w-5" v-else />
         </button>
-        <button class="darkmode" v-else @click="isDarkmode = !isDarkmode">
-          <carbon-sun class="h-5 w-5" />
+        <button class="actions--btn settings" @click="isShowSettings = true">
+          <carbon-settings class="h-5 w-5" />
         </button>
       </div>
+
+      <Settings v-model:show="isShowSettings" />
     </div>
   </nav>
 </template>
@@ -43,11 +46,13 @@ import { ref, onMounted, inject } from 'vue'
 import { downloadProject } from '@/download/download'
 import { setVersion, resetVersion } from '@/compiler/sfcCompiler'
 import { IS_DARKMODE } from '@/types'
+import Settings from './Settings.vue'
 
 const currentCommit = __COMMIT__
 const activeVersion = ref(`@${currentCommit}`)
 const publishedVersions = ref<string[]>()
 const expanded = ref(false)
+const isShowSettings = ref(false)
 
 const isDarkmode = inject(IS_DARKMODE)
 
@@ -190,13 +195,13 @@ h1 img {
 
 .versions.expanded {
   display: block;
+  @apply shadow-lg;
 }
 
-.share,
-.download,
-.darkmode {
+.actions--btn {
   @apply my-0 mx-1 p-2;
   @apply hover:bg-gray-100 hover:dark:bg-true-gray-800;
   @apply rounded-md;
+  @apply h-9;
 }
 </style>

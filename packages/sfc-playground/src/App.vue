@@ -13,15 +13,20 @@
 </template>
 
 <script setup lang="ts">
-import { provide } from 'vue'
+import { provide, reactive } from 'vue'
 import Header from './header/index.vue'
 import Editor from './editor/Editor.vue'
 import Output from './output/Output.vue'
 
-import { useDark } from '@/composable/useDark'
-import { IS_DARKMODE } from './types'
+import { useDark } from './composable/useDark'
+import { IS_DARKMODE, PLAYGROUND_SETTINGS } from './types'
+
+const settings = reactive({
+  isShowWindicssPane: false
+})
 
 provide(IS_DARKMODE, useDark())
+provide(PLAYGROUND_SETTINGS, settings)
 </script>
 
 <style>

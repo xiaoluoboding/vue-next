@@ -2,7 +2,7 @@
   <div class="preview-pane flex flex-col h-full">
     <div class="tab-buttons h-9 box-border">
       <button
-        v-for="m of modes"
+        v-for="m of activeModes"
         :key="m"
         :class="{ active: mode === m }"
         @click="mode = m"
@@ -52,13 +52,18 @@
 </template>
 
 <script setup lang="ts">
+import { ref, inject, watch } from 'vue'
+
 import Preview from './Preview.vue'
 import Console from './Console.vue'
 import MonacoEditor from '@/components/monaco/index.vue'
-import { store, clearErrors } from '@/store'
-import { ref } from 'vue'
+import { store, clearErrors } from '../store'
+import { PLAYGROUND_SETTINGS } from '../types'
+const settings = inject(PLAYGROUND_SETTINGS)
 
-const modes = ['preview', 'js', 'css', 'windicss', 'ssr'] as const
+const modes = ['preview', 'js', 'css', 'ssr', 'windicss'] as const
+
+const activeModes = ref(modes.slice(0, 4))
 
 type Modes = typeof modes[number]
 const mode = ref<Modes>('preview')
@@ -66,6 +71,17 @@ const paneSize = ref(75)
 
 const handleClearConsole = () => clearErrors()
 const handleCollapseConsole = () => paneSize.value = 100
+
+watch(
+  () => settings!.isShowWindicssPane,
+  (newVal) => {
+    if (newVal) {
+      activeModes.value.splice(3, 0, 'windicss')
+    } else {
+      activeModes.value.splice(3, 1)
+    }
+  }
+)
 </script>
 
 <style lang="scss" scoped>
