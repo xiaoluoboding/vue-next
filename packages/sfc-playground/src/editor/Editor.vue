@@ -59,7 +59,6 @@
 
 <script setup lang="ts">
 import { watch, computed } from 'vue'
-import { Splitpanes, Pane } from 'splitpanes'
 
 import FileSelector from './FileSelector.vue'
 import MonacoEditor from '@/components/monaco/index.vue'

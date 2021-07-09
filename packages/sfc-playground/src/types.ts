@@ -2,9 +2,10 @@ import { InjectionKey, Ref } from 'vue'
 
 export const IS_DARKMODE: InjectionKey<Ref<boolean>> = Symbol()
 
-export type FileSFC = {
+export interface FileSFC {
   isSetup: string | boolean
-  isScopedCSS: boolean
+  hasScoped: boolean
+  isTs: boolean
   template: string
   script: string
   setupScript?: string

@@ -52,7 +52,6 @@
 </template>
 
 <script setup lang="ts">
-import { Splitpanes, Pane } from 'splitpanes'
 import Preview from './Preview.vue'
 import Console from './Console.vue'
 import MonacoEditor from '@/components/monaco/index.vue'

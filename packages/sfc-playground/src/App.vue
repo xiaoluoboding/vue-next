@@ -17,8 +17,6 @@ import { provide } from 'vue'
 import Header from './header/index.vue'
 import Editor from './editor/Editor.vue'
 import Output from './output/Output.vue'
-import { Splitpanes, Pane } from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
 
 import { useDark } from '@/composable/useDark'
 import { IS_DARKMODE } from './types'
