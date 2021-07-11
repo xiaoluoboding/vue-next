@@ -3,12 +3,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, toRef, inject, watch, Ref } from 'vue'
+import { defineComponent, onMounted, ref, toRef, inject, watch, Ref, nextTick } from 'vue'
 import type { editor as Editor } from 'monaco-editor'
 
 import setupMonaco from './editor'
-import { debounce } from '@/utils'
-import { IS_DARKMODE } from '@/types'
+import { debounce } from '../../utils'
+import { IS_DARKMODE } from '../../types'
 
 export default defineComponent({
   name: 'MonacoEditor',
@@ -34,6 +34,10 @@ export default defineComponent({
       if (editorInstance) editorInstance.setValue(content)
     }
 
+    const formatContent = () => {
+      if (editorInstance) editorInstance.getAction('editor.action.formatDocument').run()
+    }
+
     const init = async () => {
       const { monaco } = await setupMonaco()
 
@@ -46,6 +50,8 @@ export default defineComponent({
           return 'html'
         } else if (language.value === 'css') {
           return 'css'
+        } else if (language.value === 'json') {
+          return 'json'
         }
       }
 
@@ -102,6 +108,9 @@ export default defineComponent({
       (code) => {
         if (!isEditing.value || readonly.value) {
           setContent(code)
+          if (/javascript/.test(language.value)) {
+            nextTick(formatContent)
+          }
         }
       }
     )
