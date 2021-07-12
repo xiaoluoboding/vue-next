@@ -26,7 +26,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { store } from '@/store'
+import { store } from '../store'
 import Message from './Message.vue'
 </script>

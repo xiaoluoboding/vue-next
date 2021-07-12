@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watchEffect, watch, inject } from 'vue'
-import type { WatchStopHandle, Ref } from 'vue'
+import type { WatchStopHandle } from 'vue'
 import srcdoc from './srcdoc.html?raw'
 import { PreviewProxy } from './PreviewProxy'
 import { MagicString } from '@vue/compiler-sfc' 
@@ -13,11 +13,12 @@ import { compileModulesForPreview } from '../compiler/moduleCompiler'
 import { store } from '../store'
 import { MAIN_CODE } from '../constants'
 import { IS_DARKMODE } from '../types'
+import { injectStrict } from '../utils'
 
 const s = new MagicString(srcdoc)
 const IMPORT_MAP_TOKEN = '<!--IMPORT_MAP-->'
 const container = ref()
-const isDarkmode = inject(IS_DARKMODE) as Ref<boolean>
+const isDarkmode = injectStrict(IS_DARKMODE)
 
 let sandbox: HTMLIFrameElement
 let proxy: PreviewProxy

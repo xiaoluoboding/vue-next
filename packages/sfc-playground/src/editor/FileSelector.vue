@@ -33,7 +33,7 @@
 import { store, addFile, deleteFile, setActive } from '../store'
 import { ref } from 'vue'
 import type { VNode } from 'vue'
-import { useClickOutside } from '@/composable/useClickOutside'
+import { useClickOutside } from '../composable/useClickOutside'
 
 const filenameRef = ref<HTMLInputElement>()
 const pending = ref(false)

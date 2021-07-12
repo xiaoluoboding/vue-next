@@ -61,9 +61,9 @@
 import { watch, computed } from 'vue'
 
 import FileSelector from './FileSelector.vue'
-import MonacoEditor from '@/components/monaco/index.vue'
-import { store } from '@/store'
-import { debounce } from '@/utils'
+import MonacoEditor from '../components/monaco/index.vue'
+import { store } from '../store'
+import { debounce } from '../utils'
 
 const onChange = debounce((code: string) => {
   store.activeFile.code = code

@@ -56,7 +56,7 @@ import { ref, inject, watch } from 'vue'
 
 import Preview from './Preview.vue'
 import Console from './Console.vue'
-import MonacoEditor from '@/components/monaco/index.vue'
+import MonacoEditor from '../components/monaco/index.vue'
 import { store, clearErrors } from '../store'
 import { PLAYGROUND_SETTINGS } from '../types'
 const settings = inject(PLAYGROUND_SETTINGS)

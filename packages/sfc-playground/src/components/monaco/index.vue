@@ -3,11 +3,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, toRef, inject, watch, Ref, nextTick } from 'vue'
+import { defineComponent, onMounted, ref, toRef, watch, nextTick } from 'vue'
 import type { editor as Editor } from 'monaco-editor'
 
 import setupMonaco from './editor'
-import { debounce } from '../../utils'
+import { debounce, injectStrict } from '../../utils'
 import { IS_DARKMODE } from '../../types'
 
 export default defineComponent({
@@ -28,7 +28,7 @@ export default defineComponent({
     const isEditing = ref(false)
     let editorInstance: Editor.IStandaloneCodeEditor
 
-    const isDarkmode = inject(IS_DARKMODE) as Ref<boolean>
+    const isDarkmode = injectStrict(IS_DARKMODE)
 
     const setContent = (content: string) => {
       if (editorInstance) editorInstance.setValue(content)

@@ -23,7 +23,7 @@
       <div class="actions flex items-center">
         <button class="actions--btn share" @click="copyLink">
           <carbon-share class="h-5 w-5" />
-        </button>  
+        </button>
         <button class="actions--btn download" @click="downloadProject">
           <carbon-download class="h-5 w-5" />
         </button>
@@ -42,10 +42,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, inject } from 'vue'
-import { downloadProject } from '@/download/download'
-import { setVersion, resetVersion } from '@/compiler/sfcCompiler'
-import { IS_DARKMODE } from '@/types'
+import { ref, onMounted } from 'vue'
+import { downloadProject } from '../download/download'
+import { setVersion, resetVersion } from '../compiler/sfcCompiler'
+import { injectStrict } from '../utils'
+import { IS_DARKMODE } from '../types'
 import Settings from './Settings.vue'
 
 const currentCommit = __COMMIT__
@@ -54,7 +55,7 @@ const publishedVersions = ref<string[]>()
 const expanded = ref(false)
 const isShowSettings = ref(false)
 
-const isDarkmode = inject(IS_DARKMODE)
+const isDarkmode = injectStrict(IS_DARKMODE)
 
 async function toggle() {
   expanded.value = !expanded.value

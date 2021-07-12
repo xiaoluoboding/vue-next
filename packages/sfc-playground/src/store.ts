@@ -38,6 +38,7 @@ interface Store {
   activeFilename: string
   readonly activeFile: File
   readonly importMap: string | undefined
+  readonly activeSFCCode: string
   errors: (string | Error)[]
   runtimeErrors: (string | Error)[]
   runtimeWarning: (string | Error)[]
