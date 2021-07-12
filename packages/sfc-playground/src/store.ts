@@ -1,6 +1,5 @@
 import { reactive, watchEffect } from 'vue'
 import { MagicString } from '@vue/compiler-sfc'
-import dedent from 'dedent'
 
 import { resetSFCCode, compileFile } from './compiler/sfcCompiler'
 import { utoa, atou } from './utils'
@@ -82,27 +81,24 @@ export const store: Store = reactive({
       '11': '<script setup lang="ts">'
     }
 
-    const sfcTemplate = dedent`
-      <template>
-      ${activeFile.sfc.template}
-      </template>
-    `
+    const sfcTemplate = `<template>
+${activeFile.sfc.template}
+</template>
+`
 
     s.append(sfcTemplate)
 
-    const sfcScript = dedent`
-      \n${scriptTagMap[~~isTS + '' + ~~isSetup]}
-      ${activeFile.sfc.script}
-      </script>
-    `
+    const sfcScript = `\n${scriptTagMap[~~isTS + '' + ~~isSetup]}
+${activeFile.sfc.script}
+</script>
+`
     s.append(sfcScript)
 
     if (activeFile.sfc.style) {
-      const sfcStyle = dedent`
-        ${hasScoped ? '<style scoped>' : '<style>'}
-        ${activeFile.sfc.style}
-        </style>
-      `
+      const sfcStyle = `${hasScoped ? '<style scoped>' : '<style>'}
+${activeFile.sfc.style}
+</style>
+`
       s.append(sfcStyle)
     }
 
@@ -144,6 +140,10 @@ export function addFile(filename: string) {
   if (filename === 'import-map.json') {
     file.code = IMPORT_MAP
   }
+
+  file.sfc.template = ''
+  file.sfc.script = ''
+  file.sfc.style = ''
 
   setActive(filename)
 }
