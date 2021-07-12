@@ -9,7 +9,6 @@ import { generateStyles } from './windiCompiler'
 import { ref } from 'vue'
 import { Node } from '@babel/types'
 
-export const MAIN_FILE = 'App.vue'
 export const COMP_IDENTIFIER = `__sfc__`
 
 /**
@@ -288,8 +287,8 @@ function transpileSetupScript(
   const scriptResult = new SFCCompiler.MagicString('')
   let bindingKeys = Object.keys(scriptBlock.bindings)
   let offset = 0
-  let componentMap = {}
-  let vnodeMap = {}
+  let componentMap: Record<string, any> = {}
+  let vnodeMap: Record<string, any> = {}
 
   const scriptAst = SFCCompiler.babelParse(scriptContent, {
     sourceType: 'module'
@@ -324,7 +323,7 @@ function transpileSetupScript(
             localSpecs
           )
         ) {
-          offset = node.end! - node.start
+          offset = node.end! - node.start!
           s.remove(node.start!, node.end!)
         }
       }
@@ -376,11 +375,11 @@ function transpileSetupScript(
                   returnNode.name === '_createBlock'
                 ) {
                   const vnodeIdentifier = scriptContent.slice(
-                    returnNodeParent.start,
-                    returnNodeParent.end
+                    returnNodeParent.start!,
+                    returnNodeParent.end!
                   )
                   vnodeMap[
-                    `${returnNode.start}${returnNode.end}`
+                    `${returnNode.start!}${returnNode.end!}`
                   ] = vnodeIdentifier
                 }
 
@@ -513,7 +512,7 @@ export async function resetSFCCode({ filename, code, sfc }: File) {
 
     sfc.isSetup =
       (descriptor.scriptSetup && descriptor.scriptSetup.setup) || false
-    sfc.isTS = scriptLang && scriptLang === 'ts'
+    sfc.isTS = (scriptLang && scriptLang === 'ts') || false
     sfc.hasScoped = descriptor.styles.some(s => s.scoped)
     sfc.template = dTemplateContent.trim()
     sfc.script = sfc.isSetup

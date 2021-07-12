@@ -8,11 +8,11 @@ import type { WatchStopHandle, Ref } from 'vue'
 import srcdoc from './srcdoc.html?raw'
 import { PreviewProxy } from './PreviewProxy'
 import { MagicString } from '@vue/compiler-sfc' 
-import { vueRuntimeUrl } from '@/compiler/sfcCompiler'
-import { compileModulesForPreview } from '@/compiler/moduleCompiler'
-import { store, MAIN_CODE } from '@/store'
-
-import { IS_DARKMODE } from '@/types'
+import { vueRuntimeUrl } from '../compiler/sfcCompiler'
+import { compileModulesForPreview } from '../compiler/moduleCompiler'
+import { store } from '../store'
+import { MAIN_CODE } from '../constants'
+import { IS_DARKMODE } from '../types'
 
 const s = new MagicString(srcdoc)
 const IMPORT_MAP_TOKEN = '<!--IMPORT_MAP-->'

@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@iconify/json": "^1.1.366",
-    "@types/codemirror": "^0.0.108",
+    "@types/dedent": "^0.7.0",
     "@types/splitpanes": "^2.2.0",
     "@vitejs/plugin-vue": "^1.2.4",
     "@vue/compiler-sfc": "^3.1.4",
@@ -28,6 +28,7 @@
     "vite-plugin-windicss": "^1.1.1"
   },
   "dependencies": {
+    "dedent": "^0.7.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.6.0",
     "monaco-editor": "^0.25.2",

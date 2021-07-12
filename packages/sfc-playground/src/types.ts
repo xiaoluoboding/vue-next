@@ -12,7 +12,7 @@ export const PLAYGROUND_SETTINGS: InjectionKey<PlaygroundSettings> = Symbol(
 export interface FileSFC {
   isSetup: string | boolean
   hasScoped: boolean
-  isTs: boolean
+  isTS: boolean
   template: string
   script: string
   setupScript?: string
