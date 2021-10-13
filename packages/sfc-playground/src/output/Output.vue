@@ -1,6 +1,6 @@
 <template>
   <div class="preview-pane flex flex-col h-full">
-    <div class="tab-buttons h-9 box-border">
+    <div class="tab-buttons box-border">
       <button
         v-for="m of activeModes"
         :key="m"

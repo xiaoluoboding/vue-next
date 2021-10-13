@@ -25,8 +25,8 @@
                 <logos-typescript-icon class="h-4 w-4" v-show="activeSFC.isTS" />
               </button>
               <button title="Toggle Script Setup" class="editor-btn" @click="handleToggleSetup">
-                <carbon-letter-ss class="h-6 w-6" v-show="activeSFC.isSetup" />
-                <carbon-s class="h-6 w-6" v-show="!activeSFC.isSetup" />
+                <carbon-letter-ss class="h-4 w-4" v-show="activeSFC.isSetup" />
+                <carbon-s class="h-4 w-4" v-show="!activeSFC.isSetup" />
               </button>
             </div>
           </div>
@@ -100,9 +100,8 @@ const handleToggleLang = () => {
 
 <style scoped>
 .editor-container {
-  height: calc(100% - 35px);
-  overflow: hidden;
-  position: relative;
+  @apply overflow-hidden relative;
+  height: calc(100% - 37px);
 }
 .editor-btn {
   @apply text-xs cursor-pointer px-2 py-1;
